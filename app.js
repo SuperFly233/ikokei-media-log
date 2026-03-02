@@ -1,0 +1,2314 @@
+// ================= 系统版本与更新日志配置中心 =================
+    // 💡 以后每次更新，只需要在这个数组的最前面加一块大括号 { version: '...', changes: ['...'] }
+    // 系统会自动把第一个作为 APP_VERSION，并自动生成 HTML 排版！
+    const APP_CHANGELOG = [{
+        version: '1.2.1',
+        date: '2026/3/2',
+        changes: [
+            '[✨里程碑] 磅礴上线「个人数据洞察看板」：点击顶部导航栏即可开启全屏统计中心。内置 Chart.js 双引擎渲染，支持实时呈现【领域涉猎饼图】、【全站评分正态分布曲线】，并自动演算“全站平均分”、“最常打的分数”、“殿堂级神作 TOP 3”与“灾难级避雷 BOT 3”等核心参数。你的精神食粮，此刻一览无遗！',
+            '[新特性] 生态闭环：系统设置新增「导入/导出 JSON 存档」功能。一键无损还原全量打分数据、专属分类框架与界面偏好，完美实现多设备无缝漫游！',
+            '[新特性] 引入强力“安全锁”机制：所有二次确认弹窗（如高危删除、未保存警告）新增防手滑倒计时。支持在设置中针对“高危操作”和“一般警告”分别自定义倒计时长。',
+            '[新特性] 「一票机制词条」支持完全客制化。该功能已精简合并至“评分细则管理”面板下方，允许全局增删改预设的一票原因，并全面接入 JSON 存档同步系统。',
+            '[新特性] 独创「沉浸式全屏写作 (Zen Mode)」：在评语栏点击开启全屏打字机模式。左侧智能停靠“上下文面板”（实时显示当前作品名、总分、细分条形图及一票状态），右侧提供无干扰广阔写作区。',
+            '[新特性] 引入「智能重名预警」：输入作品名时系统将实时检索馆藏。若发现重复，输入框下方将弹出微型“传送门”链接，支持点击后无缝跳转至原记录，极速排重。',
+            '[新特性] 编辑页面新增「原始时间追溯」：在修改评价时，弹窗顶部将直观显示该作品的原始入库时间，方便进行纵向回顾。',
+            '[新特性] 引入“时空双轴”管理系统：评价记录现已区分「创建时间」与「修改时间」。编辑旧条目时将完美保留原始入库印记，并实时更新最新活动时间。',
+            '[新特性] 排序与显示模式自由化：右上角新增针对“创建时间”与“修改时间”的四种细分排序；系统设置中支持自由切换卡片上默认显示的时间维度。',
+            // 👇 追加到 1.2.1 的最后
+            '[新特性] 交互大升级：引入自主研发的原生 HTML5 拖拽引擎。系统设置中的「评分细则」、「状态标签」、「一票词条」彻底告别繁琐的点击上下移，全面支持丝滑的拖拽重排。在被拖拽元素经过的位置会优雅地显示蓝线插入点提示，尽享指尖掌控感！',
+            '[优化] 优化评分细则面板的 UI 布局，将“保存”按钮置于“恢复默认”上方，防呆防误触。',
+            '[优化] 强化「恢复出厂设置」的安全防御机制：引入双重弹窗拦截（叠加倒计时共需三次确认），并在最后关头提供「导出 JSON 存档」的抢救按钮，彻底杜绝误删悲剧。',
+            '[优化] 优化细则释义气泡的 UI 表现，文本采用居中对齐，提升视觉平衡感。',
+            '[优化] 全面美化「版本更新日志」面板，引入语义化彩色徽章（蓝色的新特性 / 橙色的优化 / 红色的修复），大幅提升信息读取的效率与优雅度。',
+            '[优化] 提升桌面端交互体验：全面支持点击弹窗外部（磨砂遮罩层）或按 ESC 键快速关闭编辑、设置及教程面板。该操作已与防呆拦截系统打通，未保存时仍会安全唤起警告。',
+            '[优化] 优化搜索与筛选体验：在顶部导航栏切换大分类时，将自动清空当前搜索关键词与状态筛选，防止数据遮蔽误导。',
+            '[优化] 优化「一票机制」原因选择的视觉交互：选中预设原因时，下拉框会自动平滑拉长填满区域，防止长文本截断；在切换回“自定义”时优雅复原，空间利用率拉满。',
+            '[优化] 评语输入框支持智能延展：默认收起为小巧的两行高度，随字数增加或换行自动平滑伸长，保持版面整洁的同时拒绝视觉压迫感。',
+            '[优化] 引入系统级数据防丢机制：当存在未保存的评价草稿或细则修改时，意外刷新网页或关闭浏览器标签页将触发原生二次确认弹窗，彻底杜绝手滑导致的辛劳白费。',
+            '[优化] 搜索功能大幅进化：全面支持“多关键词并发搜索”。输入多个关键词并以空格分隔（如“柚子 剧本 9分”），系统将执行「全部匹配」逻辑进行深度筛选。',
+            '[优化] 强化时间管理机制：编辑现有记录时，系统将自动将该条目的时间戳更新为“当前最新时间”，使其在主页列表中自动置顶。',
+            '[优化] 卡片交互升级：支持光标悬浮在时间上时，以优雅的 Tooltip 形式同时展示“创建”与“修改”的具体时刻。',
+            '[优化] 重构「一票机制」原因选择控件的视觉动效：下拉框默认铺满全宽，选择自定义原因时输入框将带有阻尼感地向下优雅展开多行文本域，选择预设时平滑向上收缩，整体排版更加大气高级。',
+            '[优化] 优化评分细则的编辑体验：移除删除“大类”时的二次确认弹窗。得益于完善的缓冲区与手动保存机制，现在的重构操作更加畅快无阻。',
+            '[优化] 重构 Toast 提示框引擎：引入智能堆叠与生命周期重置机制。短时间内高频触发相同提示（如狂点保存）时将不再发生瀑布流刷屏，而是优雅地在原有气泡右上角弹出“红点计数徽章”，并伴随轻微的心跳动画反馈。细节体验拉满！',
+            '[优化] 优雅解决小屏幕/窗口缩放时导航栏拥挤问题：重构顶部导航栏布局，为其注入「水平滑动引擎」。现已全面支持鼠标滚轮横向滚动、鼠标按住拖拽平移，且点击任意分类时自动居中对齐，提前为移动端/触控屏适配打下完美基础。',
+            '[修复] 彻底移除冗余的旧版逻辑函数，解决增删维度、子项及排序功能失效的严重 Bug。',
+            '[修复] 修正设置面板中变量名拼写错误，并清理了重复的初始化函数。',
+            '[修复] 修正“恢复此分类默认细则”按钮的高危逻辑，现在仅精准重置当前选定的二级分类（如仅重置 动画 或 Galgame 细则），不再误伤全局自定义配置。',
+            '[修复] 解决「一票机制」逻辑割裂 Bug：滑块滑动后根据赞成/否决动态拆分提示标签与预设选项。选中预设词条时自动隐藏输入框，切换至自定义时自动清空文本，回显数据时无缝匹配。修正修改旧评价记录时，一票机制预设选项被意外覆盖清空的逻辑冲突。',
+            '[修复] 修正 Z-Index 样式层级溢出导致的小 Bug：提升全局 Toast 提示框（如“保存成功”）的最高显示层级，彻底解决其偶尔被防呆模糊遮罩层遮挡的问题。',
+            '[修复] 修正修改旧评价记录时，长篇评语输入框无法自动撑开的渲染时机 Bug。现在回显长文本时输入框将优雅地自动伸展至合适高度。',
+            '[修复] 引入「作品名唯一性校验」机制：保存时将自动检索库内重名记录。若检测到重名冲突，系统将拦截保存并弹出预警，彻底杜绝冗余重复数据的产生。'
+        ]
+    },
+    {
+        version: '1.2.0',
+        changes: [
+            '[新特性] 引入“灵动预览”机制：首页卡片悬浮 0.5s 即可自动查看多维小分细则。',
+            '[新特性] 评分面板大类显分：修改评价时，各核心大类标题旁实时显示当前的平均得分。',
+            '[优化] 评分细则管理：支持大类/小项的自由增删及实时排序调整。',
+            '[优化] 状态标签管理：支持自定义状态的显示顺序调整。',
+            '[优化] 规范化更新日志格式，引入 [新特性] [优化] [修复] 等语义化标签。',
+            '[修复] 解决评分细则管理中“恢复默认”按钮失效的问题。',
+            '[修复] 修正管理面板逻辑漏洞：现在增删维度与排序操作均需点击保存方可持久化，防止意外修改。',
+        ]
+    },
+    {
+        version: '1.1.5',
+        changes: [
+            '版权声明：在『关于本项目』中正式添加了作者信息及联系邮箱。'
+        ]
+    },
+    {
+        version: '1.1.4',
+        changes: [
+            '功能增强：高危操作区新增“重置作品状态”功能，并重新梳理了重置项的梯度顺序。',
+            'UI 优化：改进自定义状态添加按钮的布局，解决窄屏下换行的问题，使用更简洁的 + 号图标。'
+        ]
+    },
+    {
+        version: '1.1.3',
+        changes: [
+            '交互革新：一票机制触发时，保留并划掉原始算分，并允许用户自定义极端状态的修正分数（不再死板锁定为 0 或 10）。'
+        ]
+    },
+    {
+        version: '1.1.2',
+        changes: [
+            '细节打磨：导出文件的命名也精确到了秒。'
+        ]
+    },
+    {
+        version: '1.1.1',
+        changes: [
+            '细节打磨：解封底层时间戳，UI外显与导出的入库时间全面精确到秒。'
+        ]
+    },
+    {
+        version: '1.1.0',
+        changes: [
+            '重构一票机制，引入左右滑块交互，强制要求填写判定原因。',
+            '新增首页全局搜索，支持作品名、评语及状态标签的多维检索。',
+            '支持保存“待完善”状态（缺分数/无评语检测）。',
+            '新增「关于本项目」页面及版本控制系统。',
+            '支持导出纯文本 TXT 格式，采用时间戳动态命名。'
+        ]
+    },
+    {
+        version: '1.0.0',
+        changes: [
+            '初创版本，建立十余种分类与雷达图加权算分核心引擎。'
+        ]
+    }
+];
+
+// 自动提取数组第一个作为当前最新版本号，再也不用手动改了！
+const APP_VERSION = APP_CHANGELOG[0].version;
+
+// ================= 核心数据字典 (彻底清空旧缓存，升级至 v2) =================
+const categoryTree = {
+    'all': { name: '全部记录', subs: {} },
+    'acg': { name: '二次元 / ACG', subs: { 'anime': '番剧 / 动画', 'vn': 'Galgame', 'game': '游戏', 'manga': '漫画 / 轻小说', 'acg_music': 'ACG 音乐' } },
+    'live_action': { name: '三次元影视', subs: { 'movie': '电影', 'tv': '电视剧', 'doc': '纪录片' } },
+    'literature': { name: '文学与阅读', subs: { 'novel': '长/中篇小说', 'prose': '散文 / 随笔', 'nonfic': '社科 / 纪实', 'poetry': '诗歌 / 戏剧' } },
+    'art_audio': { name: '艺术与泛听觉', subs: { 'artbook': '摄影集 / 画册', 'podcast': '泛音乐 / 播客' } }
+};
+
+const defaultSchemas_v2 = {
+  'anime': [
+    { id: 'an_sc', name: '剧本与叙事', weight: 0.30, subs: [{id:'ans1', name:'主线架构', desc:'故事主干的完整性与逻辑框架'}, {id:'ans2', name:'叙事节奏', desc:'情节推进的流畅度与起伏把控'}, {id:'ans3', name:'伏笔回收', desc:'设定的闭环与结局收束完整度'}] },
+    { id: 'an_ch', name: '角色塑造', weight: 0.25, subs: [{id:'anc1', name:'人设辨识度', desc:'角色属性、外貌与记忆点'}, {id:'anc2', name:'成长弧光', desc:'角色经历事件后的转变与发展'}, {id:'anc3', name:'动机与情感共鸣', desc:'行为逻辑是否足以打动人心'}] },
+    { id: 'an_vi', name: '作画与演出', weight: 0.20, subs: [{id:'anv1', name:'分镜张力', desc:'镜头语言与关键画面的冲击力'}, {id:'anv2', name:'动作/日常流畅度', desc:'作画张数与人物形体崩坏控制'}, {id:'anv3', name:'场景与光影美术', desc:'背景绘制与色彩传递的情绪'}] },
+    { id: 'an_au', name: '声乐表现', weight: 0.15, subs: [{id:'ana1', name:'CV契合度', desc:'声优声线与角色贴合度及表现力'}, {id:'ana2', name:'配乐渲染力', desc:'BGM切入时机与氛围感染力'}, {id:'ana3', name:'音效细节', desc:'环境音、战斗音效的真实与质感'}] },
+    { id: 'an_th', name: '内核与余韵', weight: 0.10, subs: [{id:'ant1', name:'核心探讨', desc:'作品传达的深层主旨与思想'}, {id:'ant2', name:'结局收束', desc:'落幕时的处理手法'}, {id:'ant3', name:'观后长尾回味', desc:'看完后引发的持续思考或感动'}] }
+  ],
+  'vn': [
+    { id: 'vn_sc', name: '文本与剧本', weight: 0.30, subs: [{id:'vns1', name:'日常氛围感', desc:'日常互动的趣味性与心流体验'}, {id:'vns2', name:'主线悬念/逻辑', desc:'核心剧情的悬念设置与合理性'}, {id:'vns3', name:'多线剧本收束', desc:'各分支路线质量及真结局体验'}] },
+    { id: 'vn_ch', name: '角色与羁绊', weight: 0.25, subs: [{id:'vnc1', name:'个人线深度', desc:'单线对角色内心的挖掘程度'}, {id:'vnc2', name:'互动化学反应', desc:'主角与攻略对象间的CP感与火花'}, {id:'vnc3', name:'萌点与反差构建', desc:'角色属性设定的独特吸引力'}] },
+    { id: 'vn_sy', name: '系统与交互', weight: 0.15, subs: [{id:'vny1', name:'UI美学设计', desc:'界面的视觉舒适度与风格统一'}, {id:'vny2', name:'Skip/Log便捷度', desc:'快进、回看、存档机制的流畅性'}, {id:'vny3', name:'自定义自由度', desc:'按键、独立音量等设置的详尽度'}] },
+    { id: 'vn_vi', name: '美术视效', weight: 0.15, subs: [{id:'vnv1', name:'立绘精细度', desc:'人体比例、服饰细节与表情差分'}, {id:'vnv2', name:'CG构图与差分', desc:'关键节点CG的张力与变化丰富度'}, {id:'vnv3', name:'画面演出效果', desc:'特效、震屏与静态画面的动态感'}] },
+    { id: 'vn_au', name: '音声沉浸', weight: 0.15, subs: [{id:'vna1', name:'CV表现力', desc:'语气生动度、情感爆发与娇喘等'}, {id:'vna2', name:'场景环境音', desc:'提升沉浸感的拟音(风雨/脚步等)'}, {id:'vna3', name:'BGM契合度', desc:'配乐对当前文本情绪的精准烘托'}] }
+  ],
+  'game': [
+    { id: 'ga_gp', name: '核心玩法', weight: 0.35, subs: [{id:'gag1', name:'机制深度', desc:'系统玩法的可挖掘空间与策略性'}, {id:'gag2', name:'交互反馈/打击感', desc:'操作响应、物理反馈与手柄震动'}, {id:'gag3', name:'难度与成长曲线', desc:'挑战难度的合理递进与奖励机制'}] },
+    { id: 'ga_wd', name: '世界与关卡', weight: 0.25, subs: [{id:'gaw1', name:'箱庭/开放探索', desc:'地图设计的精妙程度与探索欲'}, {id:'gaw2', name:'地图引导设计', desc:'任务、路标与解谜的自然引导'}, {id:'gaw3', name:'场景环境叙事', desc:'通过场景物件与碎片传达的碎片故事'}] },
+    { id: 'ga_sc', name: '剧情与演出', weight: 0.20, subs: [{id:'gas1', name:'世界观建构', desc:'背景设定的吸引力与逻辑自洽'}, {id:'gas2', name:'过场演出张力', desc:'即时演算演出的电影感与运镜'}, {id:'gas3', name:'文本对白质量', desc:'台词的生动性与人物配音文本'}] },
+    { id: 'ga_te', name: '视听与技术', weight: 0.20, subs: [{id:'gat1', name:'画面精度与优化', desc:'贴图材质、光追效果与帧数稳定性'}, {id:'gat2', name:'动作捕捉/渲染', desc:'人物动作自然度与面部表情'}, {id:'gat3', name:'原声与空间音效', desc:'OST质量与3D环境音响定位'}] }
+  ],
+  'manga': [
+    { id: 'ma_vi', name: '分镜与画工', weight: 0.35, subs: [{id:'mav1', name:'画面表现力', desc:'线条、网点与大场面的震撼感'}, {id:'mav2', name:'分镜流畅度/视导', desc:'阅读视线引导与动作的连贯性'}, {id:'mav3', name:'人体与透视构图', desc:'基础画功、人体结构与特殊透视'}] },
+    { id: 'ma_sc', name: '剧本结构', weight: 0.30, subs: [{id:'mas1', name:'篇章连贯性', desc:'长篇连载时的剧情衔接与规划'}, {id:'mas2', name:'核心脑洞/设定', desc:'题材与点子的新颖程度'}, {id:'mas3', name:'叙事节奏把控', desc:'水剧情程度与高潮爆发点的铺垫'}] },
+    { id: 'ma_ch', name: '角色塑造', weight: 0.20, subs: [{id:'mac1', name:'性格立体度', desc:'角色的多面性与非脸谱化'}, {id:'mac2', name:'行为逻辑合理性', desc:'角色的决策是否符合其设定'}, {id:'mac3', name:'群像关系网', desc:'配角塑造与角色间的互动张力'}] },
+    { id: 'ma_th', name: '思想内核', weight: 0.15, subs: [{id:'mat1', name:'主题挖掘深度', desc:'作品试图探讨的深层社会/人性议题'}, {id:'mat2', name:'价值观表达', desc:'作者通过故事传递的态度'}, {id:'mat3', name:'画面留白与隐喻', desc:'非文字表达的隐喻与艺术性'}] }
+  ],
+  'acg_music': [
+    { id: 'mu_me', name: '编曲与旋律', weight: 0.35, subs: [{id:'mum1', name:'旋律记忆点', desc:'主旋律是否抓耳、有传唱度'}, {id:'mum2', name:'乐器编排与层次', desc:'配器的丰富度与声部交织的精妙'}, {id:'mum3', name:'和声走向设计', desc:'和弦编排的创新与情绪推动力'}] },
+    { id: 'mu_vo', name: '人声与演奏', weight: 0.30, subs: [{id:'muv1', name:'情感爆发/感染力', desc:'歌手/演奏者倾注的情感浓度'}, {id:'muv2', name:'技巧运用', desc:'转音、颤音、高低音域的驾驭'}, {id:'muv3', name:'音色特质辨识度', desc:'嗓音或主奏乐器的独特个性'}] },
+    { id: 'mu_ly', name: '词作与意境', weight: 0.20, subs: [{id:'mul1', name:'遣词造句美感', desc:'歌词的文学性与修辞手法'}, {id:'mul2', name:'原作主题契合度', desc:'作为OST/OP时与作品主题的贴合'}, {id:'mul3', name:'意象与画面构建', desc:'听感带来的画面联想与意境'}] },
+    { id: 'mu_mi', name: '工程与混音', weight: 0.15, subs: [{id:'mui1', name:'声场定位与宽阔度', desc:'混音营造的立体感与空间感'}, {id:'mui2', name:'频段均衡', desc:'高、中、低频的清晰分离与饱满'}, {id:'mui3', name:'动态范围控制', desc:'响度控制与细腻的强弱对比'}] }
+  ],
+  'movie': [
+    { id: 'mo_sc', name: '剧本与结构', weight: 0.30, subs: [{id:'mos1', name:'叙事诡计/结构', desc:'剧作结构的巧妙性(如倒叙、环形等)'}, {id:'mos2', name:'多线交织严密性', desc:'复杂线索的收束与逻辑漏洞控制'}, {id:'mos3', name:'台词文本张力', desc:'对白的文学性、潜台词与戏剧冲突'}] },
+    { id: 'mo_vi', name: '视听语言', weight: 0.30, subs: [{id:'mov1', name:'镜头调度', desc:'长镜头、走位与画面构图设计'}, {id:'mov2', name:'光影与色彩美学', desc:'色彩调性对氛围与心理的暗示'}, {id:'mov3', name:'剪辑节奏把控', desc:'蒙太奇手法的运用与叙事节奏'}] },
+    { id: 'mo_ac', name: '表演塑造', weight: 0.20, subs: [{id:'moa1', name:'情绪爆发力', desc:'高光时刻演员的情感释放'}, {id:'moa2', name:'微表情控制', desc:'细腻的面部肌肉管理与眼神戏'}, {id:'moa3', name:'角色气质契合', desc:'演员本身特质与剧本角色的融合度'}] },
+    { id: 'mo_au', name: '音效配乐', weight: 0.10, subs: [{id:'mou1', name:'氛围烘托精准度', desc:'OST切入对情绪的推动'}, {id:'mou2', name:'声音设计/拟音', desc:'特殊音效对临场感与压迫感的塑造'}, {id:'mou3', name:'沉默/留白运用', desc:'无声胜有声的声场控制'}] },
+    { id: 'mo_th', name: '哲学表达', weight: 0.10, subs: [{id:'mot1', name:'影像隐喻深度', desc:'道具、构图背后的象征意义'}, {id:'mot2', name:'时代社会投射', desc:'对现实社会的批判或反思'}, {id:'mot3', name:'思想启发性', desc:'打破常规认知的哲学启迪'}] }
+  ],
+  'tv': [
+    { id: 'tv_sc', name: '剧作与悬念', weight: 0.35, subs: [{id:'tvs1', name:'单集钩子/悬念', desc:'每集结尾留存观众的吸引力'}, {id:'tvs2', name:'长线草蛇灰线', desc:'贯穿整季的伏笔铺陈与回收'}, {id:'tvs3', name:'逻辑闭环完整度', desc:'大结局填坑情况与无注水程度'}] },
+    { id: 'tv_ch', name: '群像成长', weight: 0.25, subs: [{id:'tvc1', name:'角色弧光转变', desc:'长时间跨度下人物性格的合理演变'}, {id:'tvc2', name:'关系动态演变', desc:'角色间联盟、背叛等化学反应'}, {id:'tvc3', name:'动机信服度', desc:'行为是否符合常理与设定'}] },
+    { id: 'tv_pr', name: '制作水准', weight: 0.25, subs: [{id:'tvp1', name:'服化道考究度', desc:'服装、化妆、道具的时代还原与质感'}, {id:'tvp2', name:'摄影构图美感', desc:'电视剧摄影的电影感追求'}, {id:'tvp3', name:'场景美术置景', desc:'实景搭建与特效合成的融合'}] },
+    { id: 'tv_th', name: '主题探讨', weight: 0.15, subs: [{id:'tvt1', name:'社会切片精准度', desc:'对特定行业或人群的真实刻画'}, {id:'tvt2', name:'价值观碰撞', desc:'多元立场在剧中的博弈'}, {id:'tvt3', name:'人性幽暗/闪光点', desc:'展现人性的复杂多面'}] }
+  ],
+  'doc': [
+    { id: 'do_re', name: '真实与客观', weight: 0.35, subs: [{id:'dor1', name:'视角中立性', desc:'导演是否避免了过度的刻意引导'}, {id:'dor2', name:'史料/素材详实度', desc:'档案、采访记录的深度与广度'}, {id:'dor3', name:'推演逻辑链条', desc:'结论推导是否经得起推敲'}] },
+    { id: 'do_sc', name: '叙事剪辑', weight: 0.25, subs: [{id:'dos1', name:'素材组织架构', desc:'海量碎片素材的编排逻辑'}, {id:'dos2', name:'叙述节奏把控', desc:'沉闷话题的趣味化或紧凑化处理'}, {id:'dos3', name:'切入点新颖度', desc:'选题角度的独特与猎奇性'}] },
+    { id: 'do_vi', name: '影像美学', weight: 0.25, subs: [{id:'dov1', name:'构图质感', desc:'纪实影像的构图审美'}, {id:'dov2', name:'现场抓拍张力', desc:'不可复制的冲突瞬间捕捉'}, {id:'dov3', name:'色彩调性', desc:'调色对纪录片整体氛围的定调'}] },
+    { id: 'do_au', name: '声效旁白', weight: 0.15, subs: [{id:'doa1', name:'文案文本厚度', desc:'解说词的文学性与思想性'}, {id:'doa2', name:'旁白感染力/声线', desc:'配音演员嗓音的契合度与讲述感'}, {id:'doa3', name:'环境同期声收录', desc:'现场真实声音的还原度'}] }
+  ],
+  'novel': [
+    { id: 'no_st', name: '结构与叙事', weight: 0.30, subs: [{id:'nos1', name:'元小说/诡计设计', desc:'打破第四面墙或精妙的叙事圈套'}, {id:'nos2', name:'草蛇灰线与伏笔', desc:'看似闲笔实则惊雷的细节铺垫'}, {id:'nos3', name:'视角切换与拼图', desc:'多视点叙事拼凑全貌的精巧度'}] },
+    { id: 'no_fl', name: '文本与心流', weight: 0.25, subs: [{id:'nof1', name:'阅读沉浸感', desc:'文字吸力让人难以释卷的程度'}, {id:'nof2', name:'语感与叙述节奏', desc:'长短句交错带来的文字呼吸感'}, {id:'nof3', name:'修辞与隐喻美感', desc:'巧妙的比喻与诗意的遣词造句'}] },
+    { id: 'no_ch', name: '人物与动机', weight: 0.20, subs: [{id:'noc1', name:'潜意识与心理刻画', desc:'对复杂幽微内心世界的深挖'}, {id:'noc2', name:'行为逻辑严密性', desc:'性格决定命运的合理推演'}, {id:'noc3', name:'命运抗争张力', desc:'人物在极端困境下的挣扎与光辉'}] },
+    { id: 'no_th', name: '思想与哲理', weight: 0.25, subs: [{id:'not1', name:'存在主义探讨', desc:'对生命意义与个人选择的拷问'}, {id:'not2', name:'荒诞感/虚无建构', desc:'揭示现实悖论的卡夫卡式荒诞'}, {id:'not3', name:'时代/社会隐喻', desc:'折射宏大历史与社会现实的深度'}] }
+  ],
+  'prose': [
+    { id: 'pr_la', name: '语言与修辞', weight: 0.35, subs: [{id:'prl1', name:'遣词炼字精准度', desc:'用词的考究与独创性'}, {id:'prl2', name:'语感韵律美', desc:'文字朗读时的声韵和谐与节奏'}, {id:'prl3', name:'意象密度与新意', desc:'新鲜比喻与意象组合带来的美学冲击'}] },
+    { id: 'pr_st', name: '形散与神聚', weight: 0.35, subs: [{id:'prs1', name:'思绪发散自由度', desc:'联想的开阔与思维的跳跃感'}, {id:'prs2', name:'核心主旨穿透力', desc:'发散收束后直击内核的力度'}, {id:'prs3', name:'篇章结构收放', desc:'起承转合的自然散淡与不落俗套'}] },
+    { id: 'pr_em', name: '情感与共鸣', weight: 0.30, subs: [{id:'pre1', name:'表达真诚度', desc:'不做作、不无病呻吟的文字底色'}, {id:'pre2', name:'阅历厚度与沧桑感', desc:'透过文字显露的生命体悟'}, {id:'pre3', name:'情绪共振极值', desc:'引发读者深深共鸣与嗟叹的程度'}] }
+  ],
+  'nonfic': [
+    { id: 'nf_lo', name: '逻辑与论证', weight: 0.35, subs: [{id:'nfl1', name:'理论框架严密性', desc:'立论的基础架构是否稳固自洽'}, {id:'nfl2', name:'核心概念定义清晰', desc:'专业术语使用的准确与明晰'}, {id:'nfl3', name:'推理演进连贯性', desc:'层层递进、环环相扣的逻辑推导'}] },
+    { id: 'nf_ev', name: '资料与考据', weight: 0.30, subs: [{id:'nfe1', name:'数据详实/多维考证', desc:'论据的丰富度与视角的交叉验证'}, {id:'nfe2', name:'引用文献权威性', desc:'资料来源的可靠与学术严谨度'}, {id:'nfe3', name:'案例佐证精准度', desc:'所选案例对核心观点的支撑力度'}] },
+    { id: 'nf_in', name: '洞察启发', weight: 0.20, subs: [{id:'nfi1', name:'视角独特性', desc:'提供看待世界或历史的全新维度'}, {id:'nfi2', name:'破除常识/反直觉', desc:'颠覆固有认知的震撼感'}, {id:'nfi3', name:'思维模型拓展', desc:'读后对个人认知体系的实质性升级'}] },
+    { id: 'nf_re', name: '文本易读性', weight: 0.15, subs: [{id:'nfr1', name:'枯燥度降解能力', desc:'将硬核知识写得引人入胜的笔力'}, {id:'nfr2', name:'专业术语拆解', desc:'面向大众的深入浅出解说'}, {id:'nfr3', name:'叙述流畅度', desc:'文字本身的连贯与阅读顺畅感'}] }
+  ],
+  'poetry': [
+    { id: 'po_im', name: '意象与隐喻', weight: 0.35, subs: [{id:'poi1', name:'意象组合创新', desc:'打破常规搭配产生的陌生化美感'}, {id:'poi2', name:'象征内核深度', desc:'意象背后承载的深层哲学或情感'}, {id:'poi3', name:'联想与延展空间', desc:'诗意带来的无限解读可能与留白'}] },
+    { id: 'po_rh', name: '韵律与形式', weight: 0.35, subs: [{id:'por1', name:'内生节奏感', desc:'脱离外在格式的诗意内在呼吸'}, {id:'por2', name:'押韵/分行美学', desc:'形式上的音韵美与分行节奏'}, {id:'por3', name:'文字排列的视觉张力', desc:'版式布局等视觉层面的诗意探索'}] },
+    { id: 'po_in', name: '直觉情感', weight: 0.30, subs: [{id:'pon1', name:'灵光闪现的锐度', desc:'极具穿透力、直击灵魂的诗眼'}, {id:'pon2', name:'情绪结晶浓度', desc:'高度浓缩提纯的情感爆发力'}, {id:'pon3', name:'留白与余韵', desc:'读完后在脑海中久久回荡的震颤'}] }
+  ],
+  'artbook': [
+    { id: 'ar_li', name: '光影与构图', weight: 0.35, subs: [{id:'arl1', name:'曝光控制/光比分配', desc:'光影塑造的体积感与氛围层次'}, {id:'arl2', name:'几何视觉引导线', desc:'画面构图对视线的精妙牵引'}, {id:'arl3', name:'空间透视感', desc:'二维平面中创造的三维纵深体验'}] },
+    { id: 'ar_co', name: '概念与叙事', weight: 0.35, subs: [{id:'arc1', name:'决定性瞬间抓拍', desc:'按下快门时无可替代的冲突瞬间'}, {id:'arc2', name:'组图叙事连贯性', desc:'画册整体编排形成的故事性流淌'}, {id:'arc3', name:'核心主题传达', desc:'视觉元素对立意的高效准确投射'}] },
+    { id: 'ar_te', name: '质感色彩', weight: 0.15, subs: [{id:'art1', name:'色彩情绪渲染', desc:'色调搭配对观看者心理的微妙暗示'}, {id:'art2', name:'颗粒与锐度质感', desc:'底片颗粒或材质肌理带来的审美'}, {id:'art3', name:'后期修饰克制度', desc:'避免过度失真的恰到好处处理'}] },
+    { id: 'ar_pr', name: '装帧印制', weight: 0.15, subs: [{id:'arp1', name:'纸张触感/显色度', desc:'材质选择对作品最终呈现的加成'}, {id:'arp2', name:'开本与版式设计', desc:'整体画册拿在手中的物理交互体验'}, {id:'arp3', name:'排版留白呼吸感', desc:'图像与留白的节奏搭配'}] }
+  ],
+  'podcast': [
+    { id: 'pd_co', name: '内容硬核度', weight: 0.40, subs: [{id:'pdc1', name:'信息密度', desc:'单位时间内输出的高质量干货量'}, {id:'pdc2', name:'选题切入角度', desc:'独到、刁钻且有价值的议题切入'}, {id:'pdc3', name:'逻辑推演结构', desc:'讨论不散漫，有一条清晰的主轴'}] },
+    { id: 'pd_ex', name: '表达与互动', weight: 0.35, subs: [{id:'pde1', name:'讲述节奏/控场', desc:'主播把控进度、引导话题的能力'}, {id:'pde2', name:'嘉宾化学反应', desc:'多方对谈时的观点碰撞与火花'}, {id:'pde3', name:'观点输出清晰度', desc:'口头表达的条理性与易理解程度'}] },
+    { id: 'pd_au', name: '声音工程', weight: 0.25, subs: [{id:'pda1', name:'录音底噪与混响控制', desc:'录音环境的专业度与人声质感'}, {id:'pda2', name:'剪辑去口癖流畅度', desc:'后期对冗余信息的净化与衔接'}, {id:'pda3', name:'Jingle/音效铺垫', desc:'片头尾及转场音效对氛围的提升'}] }
+  ]
+};
+
+const defaultStatuses = ['已看 / 通关', '二刷 / 多周目中', '进行中', '搁置中', '烂尾弃坑'];
+
+// ================= 全局状态管理 =================
+let currentMainFilter = 'all';
+let currentSubFilter = 'all'; 
+let currentSort = 'update_desc';
+let currentEditingId = null; 
+let activeScores = {}; 
+let radarChartInstance = null;
+
+// 脏数据防丢标识
+let isRecordDirty = false;
+let isSchemaDirty = false;
+
+// 获取动态设置
+let activeSchemas = JSON.parse(localStorage.getItem('CustomSchemas_v2')) || JSON.parse(JSON.stringify(defaultSchemas_v2));
+let customStatuses = JSON.parse(localStorage.getItem('CustomStatuses_v2')) || [...defaultStatuses];
+
+// ================= 一票判定原因数据字典 =================
+const defaultVoteReasons = {
+    approve: ['白月光 / 童年滤镜', '核心诡计太惊艳'],
+    veto: ['严重触碰三观底线', '喂屎烂尾 / 涉嫌欺诈']
+};
+let customVoteReasons = JSON.parse(localStorage.getItem('CustomVoteReasons_v2')) || JSON.parse(JSON.stringify(defaultVoteReasons));
+
+// 首页 tags 搜索
+let currentSearchQuery = '';
+let currentTagFilter = 'all';
+let schemaBuffer = null; // 用于存储细则编辑时的临时数据
+
+const els = {
+    navTabs: document.getElementById('mainNavTabs'),
+    subFilters: document.getElementById('subFiltersContainer'),
+    sortSelect: document.getElementById('sortSelect'),
+    displayModeSelect: document.getElementById('displayModeSelect'),
+    grid: document.getElementById('recordGrid'),
+    modal: document.getElementById('editModal'),
+    dimContainer: document.getElementById('dimensionsContainer'),
+    mainCat: document.getElementById('mainCategorySelect'),
+    subCat: document.getElementById('subCategorySelect'),
+    workName: document.getElementById('workName'),
+    status: document.getElementById('statusSelect'),
+    review: document.getElementById('reviewText'),
+    voteSlider: document.getElementById('voteSlider'),
+    voteReasonContainer: document.getElementById('voteReasonContainer'),
+    voteReasonSelect: document.getElementById('voteReasonSelect'),
+    voteReasonInput: document.getElementById('voteReasonInput'),
+    finalScore: document.getElementById('finalScoreDisplay'),
+    refDouban: document.getElementById('refDouban'),
+    refBangumi: document.getElementById('refBangumi'),
+    delBtn: document.getElementById('deleteRecordBtn'),
+    settingsModal: document.getElementById('settingsModal'),
+    themeSelect: document.getElementById('themeSelect'),
+    editorCatSelect: document.getElementById('editorCatSelect'),
+    schemaEditor: document.getElementById('schemaEditorContainer'),
+    statusList: document.getElementById('statusListContainer'),
+    searchInput: document.getElementById('searchInput'),
+    tagFilterSelect: document.getElementById('tagFilterSelect'),
+    voteScoreInput: document.getElementById('voteScoreInput'),
+    resetStatusBtn: document.getElementById('resetStatusBtn'),
+};
+
+// ================= 多体系打分换算逻辑 =================
+function getBangumiLabel(score, hasScore) {
+    if(!hasScore) return '未评级';
+    if(score >= 9.5) return '超神作';
+    if(score >= 8.5) return '神作';
+    if(score >= 7.5) return '优秀';
+    if(score >= 6.5) return '良好';
+    if(score >= 5.5) return '及格';
+    if(score >= 4.5) return '不过不失';
+    if(score >= 3.5) return '较差';
+    if(score >= 2.5) return '差';
+    if(score >= 1.5) return '极差';
+    return '不忍直视';
+}
+
+function getDoubanLabel(score, hasScore) {
+    if(!hasScore) return '未评级';
+    if(score >= 8.5) return '力荐';
+    if(score >= 7.0) return '推荐';
+    if(score >= 5.0) return '还行';
+    if(score >= 3.0) return '较差';
+    return '很差';
+}
+
+function renderStars(score) {
+    let stars = Math.round(score / 2);
+    if (stars < 1) stars = 1; // 豆瓣保底 1 星
+    if (stars > 5) stars = 5; // 安全限制最高 5 星
+    let str = '';
+    for(let i=1; i<=5; i++) { str += (i <= stars) ? '★' : '☆'; }
+    return str;
+}
+
+// ================= 弹窗组件与主题 =================
+function showToast(msg) {
+    const container = document.getElementById('toastContainer');
+    // 1. 查找屏幕上是否已经有一个内容完全相同的存活 Toast
+    const existingToasts = Array.from(container.children);
+    const duplicate = existingToasts.find(t => t.dataset.msg === msg && t.classList.contains('show'));
+
+    if (duplicate) {
+        // 2. 如果存在，不创建新节点，而是更新红点计数
+        let count = parseInt(duplicate.dataset.count || 1) + 1;
+        duplicate.dataset.count = count;
+        
+        // 寻找或创建红点 badge
+        let badge = duplicate.querySelector('.toast-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'toast-badge';
+            duplicate.appendChild(badge);
+        }
+        badge.textContent = count;
+        
+        // 触发心跳动画 (利用 offsetWidth 强制引发 DOM 重绘以重启 CSS 动画)
+        duplicate.classList.remove('pulse');
+        void duplicate.offsetWidth; 
+        duplicate.classList.add('pulse');
+
+        // 核心机制：清除旧的死亡倒计时，重新续命 2.5 秒！
+        clearTimeout(duplicate.hideTimer);
+        duplicate.hideTimer = setTimeout(() => {
+            duplicate.classList.remove('show');
+            setTimeout(() => duplicate.remove(), 300);
+        }, 2500);
+        return;
+    }
+
+    // 3. 如果是新的提示，正常创建
+    const toast = document.createElement('div'); 
+    toast.className = 'toast'; 
+    toast.textContent = msg;
+    toast.dataset.msg = msg; // 隐藏属性：记录原始文字，防止和红点的文字混淆
+    toast.dataset.count = 1;
+    
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // 隐藏属性：将定时器挂载在 DOM 上，以便随时可以抢救它
+    toast.hideTimer = setTimeout(() => { 
+        toast.classList.remove('show'); 
+        setTimeout(() => toast.remove(), 300); 
+    }, 2500);
+}
+
+function showConfirm(title, message, onConfirmCallback, type = 'danger') {
+    const overlay = document.getElementById('confirmOverlay'); // 👈 紧急修复：补上丢失的弹窗 DOM 声明
+    const okBtn = document.getElementById('confirmOkBtn');
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+    
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    
+    // 动态读取最新设置
+    const prefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}');
+    let delayTime = prefs[type] !== undefined ? parseInt(prefs[type]) : 3;
+
+    overlay.classList.add('active');
+    
+    let timer = null;
+    
+    // 关闭弹窗时必须清理定时器，防止内存泄漏或下一次弹窗闪烁
+    const closeBox = () => { 
+        if (timer) clearInterval(timer);
+        overlay.classList.remove('active'); 
+    };
+
+    if (delayTime > 0) {
+        okBtn.disabled = true;
+        okBtn.style.opacity = '0.5';
+        okBtn.style.cursor = 'not-allowed';
+        okBtn.textContent = `确定 (${delayTime}s)`;
+
+        timer = setInterval(() => {
+            delayTime--;
+            if (delayTime > 0) {
+                okBtn.textContent = `确定 (${delayTime}s)`;
+            } else {
+                clearInterval(timer);
+                okBtn.disabled = false;
+                okBtn.style.opacity = '1';
+                okBtn.style.cursor = 'pointer';
+                okBtn.textContent = `确定`;
+            }
+        }, 1000);
+    } else {
+        okBtn.disabled = false;
+        okBtn.style.opacity = '1';
+        okBtn.style.cursor = 'pointer';
+        okBtn.textContent = `确定`;
+    }
+
+    cancelBtn.onclick = closeBox;
+    okBtn.onclick = () => { if (!okBtn.disabled) { closeBox(); onConfirmCallback(); } };
+}
+
+function debounce(func, wait) {
+    let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); };
+}
+
+function applyTheme(theme) {
+    if(theme === 'auto') document.documentElement.setAttribute('data-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    else document.documentElement.setAttribute('data-theme', theme);
+    debouncedRechart();
+}
+const debouncedRechart = debounce(() => { if(els.modal.classList.contains('active')) calculateScore(); }, 150);
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if(localStorage.getItem('themePref_v2') === 'auto') applyTheme('auto');
+});
+
+// ================= 自动渲染更新日志 (引入彩色徽章) =================
+function renderChangelog() {
+    const container = document.getElementById('changelogContainer');
+    if(!container) return;
+    container.innerHTML = '';
+    
+    APP_CHANGELOG.forEach((log, index) => {
+        const isCurrent = index === 0;
+        // 外框样式
+        const wrapperStyle = isCurrent 
+            ? `background: var(--score-bg); padding: 16px; border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.03);` 
+            : `padding: 16px 12px; border-bottom: 1px dashed var(--border-color);`;
+        
+            const titleHtml = isCurrent 
+            ? `<strong style="color: var(--primary); font-size: 16px; letter-spacing: 0.5px;">v${log.version}</strong> <span style="font-size:12px; color:var(--text-muted); font-weight: bold; margin-left: 6px;">(${log.date || '未知日期'})</span>`
+            : `<strong style="color: var(--text-main); font-size: 15px;">v${log.version}</strong> <span style="font-size:11px; color:var(--text-muted); margin-left: 8px;">${log.date || ''}</span>`;
+            
+        const lis = log.changes.map(c => {
+            // 利用正则提取中括号里的文字，比如 [新特性]:root
+            const match = c.match(/^\[(.*?)\]\s*(.*)/);
+            if (match) {
+                const tag = match[1];
+                const text = match[2];
+                
+                // 根据不同标签赋予不同颜色方案
+                let tagStyle = '';
+                if (tag.includes('新特性')) {
+                    tagStyle = 'background: rgba(52, 152, 219, 0.1); color: var(--link-color); border: 1px solid rgba(52, 152, 219, 0.3);';
+                } else if (tag.includes('优化')) {
+                    tagStyle = 'background: rgba(241, 196, 15, 0.15); color: #d68910; border: 1px solid rgba(241, 196, 15, 0.4);';
+                } else if (tag.includes('修复')) {
+                    tagStyle = 'background: rgba(231, 76, 60, 0.1); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3);';
+                } else {
+                    tagStyle = 'background: var(--border-color); color: var(--text-muted); border: 1px solid transparent;';
+                }
+                
+                // 使用 flex 布局让标签和文字完美对齐，取代传统的原点列表
+                return `
+                    <li style="margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; white-space: nowrap; line-height: 1.2; ${tagStyle}; flex-shrink: 0; margin-top: 2px;">${tag}</span>
+                        <span style="line-height: 1.5; color: var(--text-main);">${text}</span>
+                    </li>`;
+            }
+            // 没有标签的旧日志，使用默认原点
+            return `<li style="margin-bottom: 8px; margin-left: 18px; list-style-type: disc; line-height: 1.5; color: var(--text-main);">${c}</li>`;
+        }).join('');
+        
+        // 注意这里去掉了 ul 的默认 padding 和 list-style，因为我们用 flex 接管了排版
+        const html = `
+            <div style="${wrapperStyle}">
+                ${titleHtml}
+                <ul style="margin-top: 14px; font-size: 13px; list-style: none; padding-left: 0;">
+                    ${lis}
+                </ul>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    });
+}
+
+// ================= 灵动预览核心引擎 =================
+let hoverTimer = null;
+const previewEl = document.getElementById('hoverPreview');
+
+function initHoverPreview() {
+    // 采用事件委托，监听所有的 record-card
+    document.getElementById('recordGrid').addEventListener('mouseover', (e) => {
+        const card = e.target.closest('.record-card');
+        if (!card) return;
+
+        const id = card.getAttribute('data-id'); // 我们等会要在渲染卡片时加上这个属性
+        const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+        const rec = records.find(r => r.id === id);
+        if (!rec) return;
+
+        // 开启 0.5秒 计时器
+        hoverTimer = setTimeout(() => {
+            showPreview(rec, card);
+        }, 500);
+    });
+
+    document.getElementById('recordGrid').addEventListener('mouseout', () => {
+        clearTimeout(hoverTimer);
+        previewEl.classList.remove('active');
+    });
+}
+
+function showPreview(rec, card) {
+    const schema = activeSchemas[rec.subCat];
+    if (!schema) return;
+
+    let html = `<div style="font-size:13px; font-weight:bold; margin-bottom:15px; color:var(--primary); border-bottom:1px solid var(--border-color); padding-bottom:8px;">📊 细分维度预览</div>`;
+    
+    schema.forEach(dim => {
+        let sum = 0;
+        dim.subs.forEach(s => sum += (rec.scores[s.id] || 0));
+        const avg = sum / dim.subs.length;
+        const percent = (avg * 10).toFixed(0);
+
+        html += `
+            <div class="preview-dim-row">
+                <div class="preview-dim-header">
+                    <span>${dim.name}</span>
+                    <span>${avg.toFixed(1)}</span>
+                </div>
+                <div class="preview-bar-bg"><div class="preview-bar-fill" style="width: ${percent}%"></div></div>
+            </div>`;
+    });
+
+    previewEl.innerHTML = html;
+
+    // 计算位置：出现在卡片旁边
+    const rect = card.getBoundingClientRect();
+    let left = rect.right + 15;
+    let top = rect.top;
+
+    // 边界检查：如果右边放不下，就放左边
+    if (left + 280 > window.innerWidth) {
+        left = rect.left - 275;
+    }
+    
+    previewEl.style.left = `${left}px`;
+    previewEl.style.top = `${top}px`;
+    previewEl.classList.add('active');
+}
+
+// ================= 初始化 =================
+function init() {
+    const savedTheme = localStorage.getItem('themePref_v2') || 'auto';
+    els.themeSelect.value = savedTheme; applyTheme(savedTheme);
+    
+    // 读取呈现模式
+    const savedDisplayMode = localStorage.getItem('displayModePref_v2') || 'system';
+    els.displayModeSelect.value = savedDisplayMode;
+
+    // 👇 新增：初始化时间显示偏好
+    const savedTimePref = localStorage.getItem('timeDisplayPref_v2') || 'updated';
+    document.getElementById('timeDisplayModeSelect').value = savedTimePref;
+    document.getElementById('timeDisplayModeSelect').onchange = (e) => {
+        localStorage.setItem('timeDisplayPref_v2', e.target.value);
+        renderMainList();
+    };
+
+    // 初始化版本号显示
+    document.querySelectorAll('.versionText').forEach(el => el.textContent = APP_VERSION);
+
+    // 调用刚才写的自动渲染函数
+    renderChangelog();
+    
+    // 初始化弹窗延迟设置
+    const delayPrefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}');
+    document.getElementById('delayDangerInput').value = delayPrefs.danger;
+    document.getElementById('delayWarningInput').value = delayPrefs.warning;
+
+    const updateDelayPrefs = () => {
+        localStorage.setItem('confirmDelayPrefs_v2', JSON.stringify({
+            danger: parseInt(document.getElementById('delayDangerInput').value) || 0,
+            warning: parseInt(document.getElementById('delayWarningInput').value) || 0
+        }));
+    };
+    document.getElementById('delayDangerInput').addEventListener('change', updateDelayPrefs);
+    document.getElementById('delayWarningInput').addEventListener('change', updateDelayPrefs);
+
+    initNavTabs(); initCascader(); renderMainList();
+    
+    if(!localStorage.getItem('hasSeenTutorial_v2')) setTimeout(openTutorial, 500);
+
+    initHoverPreview();
+}
+
+// ================= 导航与瀑布流 =================
+function initNavTabs() {
+    Object.keys(categoryTree).forEach(key => {
+        const tab = document.createElement('div');
+        tab.className = `nav-tab ${key === 'all' ? 'active' : ''}`;
+        tab.textContent = categoryTree[key].name;
+        tab.onclick = () => {
+            // 🛡️ 防误触锁：如果是正在拖拽滑动中松开鼠标，则阻止触发点击切换
+            if (window.isDraggingNavTabs) return; 
+
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // 🚀 极致优雅：点击时自动将该标签平滑滚动至屏幕视野中央
+            tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+            currentMainFilter = key; currentSubFilter = 'all'; 
+            els.searchInput.value = '';
+            currentSearchQuery = '';
+            els.tagFilterSelect.value = 'all';
+            currentTagFilter = 'all';
+            
+            renderSubFilters(); renderMainList();
+        };
+        els.navTabs.appendChild(tab);
+    });
+
+    // 👇 注入：导航栏横向滑动引擎 (完美兼容桌面鼠标与移动端手势)
+    const navContainer = els.navTabs;
+    
+    // 1. 拦截鼠标滚轮：将上下滚动无缝转化为左右滑动
+    navContainer.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+            navContainer.scrollBy({ left: e.deltaY * 2, behavior: 'auto' });
+        }
+    }, { passive: false });
+
+    // 2. 鼠标按住拖拽滑动 (原生 App 体验)
+    let isDown = false;
+    let startX, scrollLeft;
+    window.isDraggingNavTabs = false; 
+
+    navContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        window.isDraggingNavTabs = false;
+        navContainer.style.cursor = 'grabbing';
+        navContainer.style.userSelect = 'none'; // 防止拖拽时选中文字变蓝
+        startX = e.pageX - navContainer.offsetLeft;
+        scrollLeft = navContainer.scrollLeft;
+    });
+
+    navContainer.addEventListener('mouseleave', () => { isDown = false; navContainer.style.cursor = ''; });
+
+    navContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        navContainer.style.cursor = '';
+        // 延迟 50ms 释放锁，防止拖拽结束瞬间触发 tab.onclick
+        setTimeout(() => window.isDraggingNavTabs = false, 50);
+    });
+
+    navContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - navContainer.offsetLeft;
+        const walk = (x - startX) * 1.5; // 滑动灵敏度倍率
+        // 滑动距离大于 10px 才判定为拖拽，避免轻微手抖导致无法点击
+        if (Math.abs(walk) > 10) window.isDraggingNavTabs = true; 
+        navContainer.scrollLeft = scrollLeft - walk;
+    });
+}
+
+function renderSubFilters() {
+    els.subFilters.innerHTML = '';
+    if (currentMainFilter === 'all') return; 
+    const allTag = document.createElement('div');
+    allTag.className = `sub-filter-tag ${currentSubFilter === 'all' ? 'active' : ''}`;
+    allTag.textContent = '全部';
+    allTag.onclick = () => { currentSubFilter = 'all'; renderSubFilters(); renderMainList(); }
+    els.subFilters.appendChild(allTag);
+
+    const subs = categoryTree[currentMainFilter].subs;
+    Object.keys(subs).forEach(subKey => {
+        const tag = document.createElement('div');
+        tag.className = `sub-filter-tag ${currentSubFilter === subKey ? 'active' : ''}`;
+        tag.textContent = subs[subKey];
+        tag.onclick = () => { currentSubFilter = subKey; renderSubFilters(); renderMainList(); }
+        els.subFilters.appendChild(tag);
+    });
+}
+
+els.searchInput.addEventListener('input', (e) => { 
+    currentSearchQuery = e.target.value.trim().toLowerCase(); 
+    renderMainList(); 
+});
+els.tagFilterSelect.addEventListener('change', (e) => { 
+    currentTagFilter = e.target.value; 
+    renderMainList(); 
+});
+
+els.sortSelect.onchange = (e) => { currentSort = e.target.value; renderMainList(); }
+els.displayModeSelect.onchange = (e) => { 
+    localStorage.setItem('displayModePref_v2', e.target.value); 
+    renderMainList(); 
+}
+
+function renderMainList() {
+    let records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    els.grid.innerHTML = '';
+
+    if (currentMainFilter !== 'all') records = records.filter(r => r.mainCat === currentMainFilter);
+    if (currentSubFilter !== 'all') records = records.filter(r => r.subCat === currentSubFilter);
+
+    // 新增：1. 状态标签过滤
+    if (currentTagFilter === 'incomplete_score') records = records.filter(r => r.isScoreIncomplete);
+    if (currentTagFilter === 'incomplete_review') records = records.filter(r => r.isReviewIncomplete);
+
+    // 升级：2. 全文智能多词检索 (支持空格分隔，全部匹配逻辑)
+    if (currentSearchQuery) {
+        // 将搜索词按空格拆分，过滤掉多余空格，得到关键词数组
+        const keywords = currentSearchQuery.split(/\s+/).filter(k => k.length > 0);
+        
+        records = records.filter(r => {
+            const name = (r.name || '').toLowerCase();
+            const review = (r.review || '').toLowerCase();
+            
+            // 构造标签池
+            let virtualTags = [r.status, r.subCatText];
+            if (r.isScoreIncomplete) virtualTags.push('缺分数');
+            if (r.isReviewIncomplete) virtualTags.push('无评语');
+            if (r.voteStatus === 1) virtualTags.push('一票赞成', '白月光');
+            if (r.voteStatus === -1) virtualTags.push('一票否决', '踩雷');
+
+            // 核心逻辑：只有当【每一个】关键词都能在作品名、评语或标签中找到匹配时，才保留记录
+            return keywords.every(kw => {
+                const matchName = name.includes(kw);
+                const matchReview = review.includes(kw);
+                const matchTags = virtualTags.some(t => (t || '').toLowerCase().includes(kw));
+                return matchName || matchReview || matchTags;
+            });
+        });
+    }
+
+    records.sort((a, b) => {
+        const scoreA = parseFloat(a.finalScore);
+        const scoreB = parseFloat(b.finalScore);
+        switch(currentSort) {
+            // 👇 修改：应用新的四个时间排序维度
+            case 'update_desc': return (b.updatedAt || b.createdAt || parseInt(b.id)) - (a.updatedAt || a.createdAt || parseInt(a.id));
+            case 'update_asc': return (a.updatedAt || a.createdAt || parseInt(a.id)) - (b.updatedAt || b.createdAt || parseInt(b.id));
+            case 'create_desc': return (b.createdAt || parseInt(b.id)) - (a.createdAt || parseInt(a.id));
+            case 'create_asc': return (a.createdAt || parseInt(a.id)) - (b.createdAt || parseInt(b.id));
+            case 'score_desc': return scoreB - scoreA;
+            case 'score_asc': return scoreA - scoreB;
+            case 'name_asc': return a.name.localeCompare(b.name, 'zh-CN');
+            case 'name_desc': return b.name.localeCompare(a.name, 'zh-CN');
+            default: return 0;
+        }
+    });
+
+    if (records.length === 0) {
+        els.grid.innerHTML = `<div class="empty-state"><h3>这里空空如也</h3><p>点击右下角 + 号，开始录入精神食粮吧</p></div>`;
+        return;
+    }
+
+    const displayMode = els.displayModeSelect.value;
+    const timeDisplayMode = localStorage.getItem('timeDisplayPref_v2') || 'updated'; // 👈 新增：读取偏好
+
+    records.forEach(rec => {
+        const card = document.createElement('div');
+        card.className = 'record-card'; card.onclick = () => openModal(rec.id);
+        card.setAttribute('data-id', rec.id);
+        const coverText = rec.name.substring(0,2).toUpperCase();
+        const voteStatus = rec.voteStatus !== undefined ? rec.voteStatus : (rec.isProtect ? 1 : (rec.isVeto ? -1 : 0));
+        let badgeHtml = '';
+        if (voteStatus === 1) badgeHtml = `<div class="protect-badge" title="${rec.voteReason || ''}">一票赞成</div>`;
+        else if (voteStatus === -1) badgeHtml = `<div class="veto-badge" title="${rec.voteReason || ''}">一票否决</div>`;
+        
+        let incompleteTags = '';
+        if (rec.isScoreIncomplete) incompleteTags += `<span class="tag-incomplete">缺分数</span>`;
+        if (rec.isReviewIncomplete) incompleteTags += `<span class="tag-incomplete">无评语</span>`;
+        
+        let scoreHtml = '';
+        let scoreTitle = '评分';
+        const scoreVal = parseFloat(rec.finalScore);
+        const hasScore = scoreVal > 0 || rec.isVeto || voteStatus === -1;
+
+        if (!hasScore) {
+            scoreHtml = `<span style="font-size:16px; color:var(--text-muted);">暂无</span>`;
+        } else if (displayMode === 'system') {
+            scoreHtml = scoreVal.toFixed(1);
+        } else if (displayMode === 'douban') {
+            scoreTitle = '豆瓣推荐';
+            scoreHtml = `<span style="font-size: 16px; letter-spacing: 2px; color: #f39c12;">${renderStars(scoreVal)}</span>`;
+        } else if (displayMode === 'bangumi') {
+            scoreTitle = 'Bangumi';
+            let bScore = Math.round(scoreVal);
+            if (bScore < 1) bScore = 1; 
+            scoreHtml = `<span>${bScore} <span style="font-size: 12px; font-weight: normal; color:var(--text-muted);">${getBangumiLabel(scoreVal, true)}</span></span>`;
+        }
+
+        // 👇 新增：智能计算悬浮提示和显示的准确时间
+        const tUpdate = rec.updatedAt || rec.createdAt || parseInt(rec.id);
+        const tCreate = rec.createdAt || parseInt(rec.id);
+        const timeToShow = timeDisplayMode === 'created' ? tCreate : tUpdate;
+        const hoverText = `修改于：${formatPreciseTime({createdAt: tUpdate})}\n创建于：${formatPreciseTime({createdAt: tCreate})}`;
+
+        card.innerHTML = `
+            ${badgeHtml}
+            <div class="record-cover" style="background: hsl(${Math.random() * 360}, 60%, 75%);">${coverText}</div>
+            <div class="record-info">
+                <div class="record-title" title="${rec.name}">${rec.name}</div>
+                <div class="record-meta" title="${hoverText}">${rec.subCatText} | ${formatPreciseTime({createdAt: timeToShow})} ${incompleteTags}</div>
+                <div class="record-desc">${rec.review || '暂无详细评语...'}</div>
+                <div class="record-bottom">
+                    <span class="record-status">${rec.status}</span>
+                    <div style="display:flex; align-items:baseline; gap:4px;">
+                        <span style="font-size:11px; color:var(--text-muted)">${scoreTitle}</span>
+                        <span class="record-score" style="font-size: ${displayMode==='system' ? '26px' : '18px'}">${scoreHtml}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        els.grid.appendChild(card);
+    });
+}
+
+// ================= 评分记录弹窗逻辑 =================
+function initCascader() {
+    els.mainCat.innerHTML = '';
+    Object.keys(categoryTree).filter(k => k !== 'all').forEach(key => {
+        els.mainCat.add(new Option(categoryTree[key].name, key));
+    });
+    els.mainCat.onchange = () => {
+        const subs = categoryTree[els.mainCat.value].subs;
+        els.subCat.innerHTML = '';
+        Object.keys(subs).forEach(subKey => els.subCat.add(new Option(subs[subKey], subKey)));
+        activeScores = {}; 
+        renderDimensions();
+        isRecordDirty = true;
+    };
+    els.subCat.onchange = () => { activeScores = {}; renderDimensions(); isRecordDirty = true; };
+}
+
+function renderStatusDropdown() {
+    els.status.innerHTML = '';
+    customStatuses.forEach(s => els.status.add(new Option(s, s)));
+}
+
+function generateBlocks(subId, val) {
+    let blocks = '';
+    for(let i = 1; i <= 10; i++) blocks += `<div class="score-block ${i <= val ? 'active' : ''}" data-val="${i}" data-subid="${subId}"></div>`;
+    return `
+        <div class="score-control-wrapper">
+            <button class="btn-score-adjust" onclick="adjustScore('${subId}', -1)">-</button>
+            <div class="blocks-container" id="blocks_${subId}">${blocks}</div>
+            <button class="btn-score-adjust" onclick="adjustScore('${subId}', 1)">+</button>
+            <input type="number" class="score-input-num" id="input_${subId}" value="${val}" min="0" max="10" onchange="setScore('${subId}', this.value)">
+        </div>
+    `;
+}
+
+function renderDimensions() {
+    els.dimContainer.innerHTML = '';
+    const schema = activeSchemas[els.subCat.value];
+    if(!schema) return;
+    schema.forEach(dim => {
+        let subsHTML = '';
+        dim.subs.forEach(sub => {
+            if(activeScores[sub.id] === undefined) activeScores[sub.id] = 0; 
+            const tooltipHtml = `<span class="tooltip-icon">?<span class="tooltip-text">${sub.desc || '暂无详细解释'}</span></span>`;
+            subsHTML += `<div class="sub-item"><div class="sub-name" title="${sub.name}">${sub.name} ${tooltipHtml}</div>${generateBlocks(sub.id, activeScores[sub.id])}</div>`;
+        });
+        els.dimContainer.insertAdjacentHTML('beforeend', `
+            <div class="dimension-group">
+                <div class="dimension-header">
+                    <div>
+                        <span class="dimension-title">${dim.name}</span>
+                        <span id="dimRealScore_${dim.id}" style="margin-left:8px; font-size:13px; color:var(--primary); font-weight:900;">0.0</span>
+                    </div>
+                    <span class="dimension-weight">权重: ${Math.round(dim.weight * 100)}%</span>
+                </div>
+                <div>${subsHTML}</div>
+            </div>`);
+    });
+    els.dimContainer.querySelectorAll('.score-block').forEach(b => { 
+        b.onclick = function() { setScore(this.dataset.subid, this.dataset.val); } 
+    });
+    calculateScore();
+}
+
+window.setScore = function(subId, val) {
+    let num = Math.min(10, Math.max(0, parseInt(val) || 0));
+    activeScores[subId] = num;
+    document.getElementById(`input_${subId}`).value = num;
+    const blocks = document.getElementById(`blocks_${subId}`).children;
+    for(let i=0; i<10; i++) { if(i < num) blocks[i].classList.add('active'); else blocks[i].classList.remove('active'); }
+    isRecordDirty = true;
+    calculateScore();
+}
+window.adjustScore = function(id, delta) { setScore(id, activeScores[id] + delta); }
+
+function calculateScore() {
+    const schema = activeSchemas[els.subCat.value];
+    let total = 0, radarData = [], radarLabels = [], hasAnyScore = false;
+    schema.forEach(dim => {
+        let sum = 0; 
+        dim.subs.forEach(s => { sum += activeScores[s.id]; if(activeScores[s.id] > 0) hasAnyScore = true; });
+        let avg = sum / dim.subs.length; total += avg * dim.weight;
+        radarData.push(avg.toFixed(1)); radarLabels.push(dim.name);
+        // 实时更新大类旁边的分值显示
+        const dimScoreEl = document.getElementById(`dimRealScore_${dim.id}`);
+        if (dimScoreEl) dimScoreEl.textContent = avg.toFixed(1);
+    });
+
+    const voteVal = parseInt(els.voteSlider.value);
+    let finalTotal = total; 
+    let displayHtml = '';
+
+    if (voteVal !== 0) {
+        finalTotal = parseFloat(els.voteScoreInput.value) || 0;
+        hasAnyScore = true;
+        displayHtml = `<span class="score-strikethrough">${total.toFixed(1)}</span>${finalTotal.toFixed(1)}`;
+    } else {
+        displayHtml = finalTotal.toFixed(1);
+    }
+
+    els.finalScore.innerHTML = displayHtml;
+    els.finalScore.setAttribute('data-score', finalTotal.toFixed(1));
+    
+    if (!hasAnyScore && finalTotal === 0 && voteVal === 0) {
+        els.finalScore.style.color = '#cbd5e0';
+        els.refDouban.innerHTML = `未评级`;
+        els.refBangumi.innerHTML = `未评级`;
+    } else {
+        if (voteVal === 1) els.finalScore.style.color = 'var(--warning)';
+        else if (voteVal === -1) els.finalScore.style.color = 'var(--danger)';
+        else if(finalTotal >= 9) els.finalScore.style.color = '#f09199'; 
+        else if(finalTotal >= 6) els.finalScore.style.color = '#f39c12'; 
+        else els.finalScore.style.color = '#7f8c8d'; 
+
+        const bLabel = getBangumiLabel(finalTotal, hasAnyScore);
+        const dLabel = getDoubanLabel(finalTotal, hasAnyScore);
+        
+        let bScoreRef = Math.round(finalTotal);
+        if (bScoreRef < 1) bScoreRef = 1; 
+        
+        els.refDouban.innerHTML = `<span style="color: #f39c12; letter-spacing: 2px; font-size: 14px;">${renderStars(finalTotal)}</span> <span style="font-weight:normal;">(${dLabel})</span>`;
+        els.refBangumi.innerHTML = `${bScoreRef} 分 <span style="font-weight:normal;">(${bLabel})</span>`;
+    }
+    
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    const labelColor = isDark ? '#a0aec0' : '#7f8c8d';
+
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    if(radarChartInstance) radarChartInstance.destroy();
+    radarChartInstance = new Chart(ctx, { 
+        type: 'radar', 
+        data: { 
+            labels: radarLabels, 
+            datasets: [{ 
+                // 如果开启了一票机制，雷达图直接拉满或清零；否则显示真实分布
+                data: voteVal !== 0 ? radarLabels.map(()=>finalTotal) : radarData, 
+                backgroundColor: 'rgba(240, 145, 153, 0.25)', 
+                borderColor: '#f09199', 
+                pointBackgroundColor: '#f09199', 
+                borderWidth: 2, 
+                pointRadius: 3 
+            }] 
+        },
+        options: { 
+            scales: { r: { min: 0, max: 10, ticks: { display: false, stepSize: 2 }, grid: { color: gridColor }, angleLines: { color: gridColor }, pointLabels: { color: labelColor, font: {size: 11, weight: 'bold'} } } }, 
+            plugins: { legend: { display: false } }, maintainAspectRatio: false, animation: { duration: 0 } 
+        } 
+    });
+}
+
+// 脏数据监听
+['workName', 'reviewText'].forEach(id => document.getElementById(id).addEventListener('input', () => isRecordDirty = true));
+els.status.addEventListener('change', () => isRecordDirty = true);
+
+// ================= 实时重名检测与跳转引擎 =================
+
+// 1. 监听输入框，实现“秒级”重名提醒
+els.workName.addEventListener('input', debounce(function() {
+    const name = this.value.trim().toLowerCase();
+    const hintEl = document.getElementById('duplicateHint');
+    
+    if (!name) { hintEl.innerHTML = ''; return; }
+
+    const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    // 寻找名字相同但 ID 不同的记录
+    const dup = records.find(r => r.name.toLowerCase() === name && r.id !== currentEditingId);
+
+    if (dup) {
+        hintEl.innerHTML = `⚠️ 馆内已有此记录：<a href="javascript:void(0)" onclick="jumpToRecord('${dup.id}')" style="color:var(--link-color); text-decoration:underline;">立即前往编辑原记录</a>`;
+    } else {
+        hintEl.innerHTML = '';
+    }
+}, 300));
+
+// 2. 实现“传送门”跳转函数
+window.jumpToRecord = (id) => {
+    // 因为用户是发现重名后主动“切换”，所以强制关闭脏检查提示
+    isRecordDirty = false; 
+    document.getElementById('editModal').classList.remove('active');
+    document.body.style.overflow = '';
+    
+    // 微调延迟后重新打开新 ID 的弹窗
+    setTimeout(() => openModal(id), 150);
+    showToast('已跳转至原有记录');
+};
+
+// ================= 一票机制动态 UI 与管理引擎 =================
+function updateVoteUI(isProgrammatic = false) {
+    const val = parseInt(els.voteSlider.value);
+    els.voteSlider.className = val === -1 ? 'thumb-veto' : (val === 1 ? 'thumb-approve' : '');
+    els.voteReasonContainer.style.display = val === 0 ? 'none' : 'block';
+    
+    if (val !== 0) {
+        const label = document.getElementById('voteReasonLabel');
+        const select = els.voteReasonSelect;
+        const type = val === 1 ? 'approve' : 'veto';
+
+        // 1. 动态分离提示文本
+        label.textContent = val === 1 ? '一票赞成的原因 (必填)：' : '一票否决的原因 (必填)：';
+
+        // 2. 动态分离下拉框内容
+        select.innerHTML = '<option value="">自定义原因...</option>';
+        customVoteReasons[type].forEach(reason => select.add(new Option(reason, reason)));
+
+        if (!isProgrammatic) {
+            select.value = '';
+            const wrapper = document.getElementById('voteReasonInputWrapper');
+            // 👇 触发向下展开动效 (高度上限放宽，包容多行文本)
+            wrapper.style.maxHeight = '150px';
+            wrapper.style.opacity = '1';
+            wrapper.style.marginTop = '8px';
+            els.voteReasonInput.value = ''; // 清空
+            if (typeof autoResizeTextarea === 'function') autoResizeTextarea(els.voteReasonInput);
+            if (val === -1) els.voteScoreInput.value = 0;
+            else if (val === 1) els.voteScoreInput.value = 10;
+        }
+    }
+    
+    if (val === -1) els.voteScoreInput.style.color = 'var(--danger)';
+    else if (val === 1) els.voteScoreInput.style.color = 'var(--warning)';
+}
+
+els.voteSlider.addEventListener('input', (e) => { updateVoteUI(false); isRecordDirty = true; calculateScore(); });
+
+// 3. 上下弹出的优雅隐藏与清空逻辑 (核心动效修复)
+els.voteReasonSelect.addEventListener('change', (e) => {
+    const wrapper = document.getElementById('voteReasonInputWrapper');
+    if (e.target.value === "") {
+        // 切回自定义：向下弹开编辑框、清空内容
+        wrapper.style.maxHeight = '150px';
+        wrapper.style.opacity = '1';
+        wrapper.style.marginTop = '8px';
+        els.voteReasonInput.style.display = 'block'; // 兜底防止意外隐藏
+        els.voteReasonInput.value = '';
+        if (typeof autoResizeTextarea === 'function') autoResizeTextarea(els.voteReasonInput);
+    } else {
+        // 选了预设：触发 CSS 动画，平滑向上收起编辑框、传值给后台
+        wrapper.style.maxHeight = '0';
+        wrapper.style.opacity = '0';
+        wrapper.style.marginTop = '0';
+        els.voteReasonInput.value = e.target.value;
+    }
+    isRecordDirty = true;
+});
+
+els.voteReasonInput.addEventListener('input', function() { 
+    isRecordDirty = true; 
+    if (typeof autoResizeTextarea === 'function') autoResizeTextarea(this); 
+});
+
+//修正分数实时同步监听器
+els.voteScoreInput.addEventListener('input', () => {
+    let val = parseFloat(els.voteScoreInput.value);
+    if(val < 0) els.voteScoreInput.value = 0;
+    if(val > 10) els.voteScoreInput.value = 10;
+    isRecordDirty = true;
+    calculateScore();
+});
+
+// 管理列表渲染与操作
+function renderVoteReasonsManager() {
+    ['approve', 'veto'].forEach(type => {
+        const listEl = document.getElementById(`${type}ReasonList`);
+        listEl.innerHTML = '';
+        customVoteReasons[type].forEach((reason, idx) => {
+            listEl.insertAdjacentHTML('beforeend', `
+                <div class="status-item draggable-item" draggable="true" ondragstart="handleDragStart(event, 'vote_${type}', ${idx})" ondragover="handleDragOver(event, 'vote_${type}')" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'vote_${type}', ${idx})" ondragend="handleDragEnd(event)">
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <div class="drag-handle" title="按住拖拽排序">☰</div>
+                        <span>${reason}</span>
+                    </div>
+                    <button class="btn-icon-del" onclick="delVoteReason('${type}', ${idx})">✖</button>
+                </div>`);
+        });
+    });
+}
+
+window.addVoteReason = (type) => {
+    const input = document.getElementById(type === 'approve' ? 'newApproveReason' : 'newVetoReason');
+    const val = input.value.trim();
+    if(!val) return;
+    if(customVoteReasons[type].includes(val)) return showToast('该原因已存在');
+    customVoteReasons[type].push(val);
+    localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+    input.value = ''; renderVoteReasonsManager(); showToast('原因词条已添加');
+};
+
+window.delVoteReason = (type, idx) => {
+    customVoteReasons[type].splice(idx, 1);
+    localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+    renderVoteReasonsManager();
+};
+
+window.moveVoteReason = (type, idx, dir) => {
+    if (idx + dir < 0 || idx + dir >= customVoteReasons[type].length) return;
+    const temp = customVoteReasons[type][idx];
+    customVoteReasons[type][idx] = customVoteReasons[type][idx+dir];
+    customVoteReasons[type][idx+dir] = temp;
+    localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+    renderVoteReasonsManager();
+};
+
+window.resetVoteReasons = () => {
+    showConfirm('重置词条确认', '清空所有自定义一票判定词条并恢复默认。确定吗？', () => {
+        customVoteReasons = JSON.parse(JSON.stringify(defaultVoteReasons));
+        localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+        renderVoteReasonsManager(); showToast('词条已恢复默认');
+    });
+};
+
+function openModal(id = null) {
+    document.getElementById('duplicateHint').innerHTML = ''; // 👈 重置重名提示
+    currentEditingId = id; els.delBtn.style.display = id ? 'block' : 'none'; 
+    renderStatusDropdown(); 
+    isRecordDirty = false;
+
+    if (id) { 
+        const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+        const rec = records.find(r => r.id === id);
+
+        document.getElementById('modalTitle').textContent = '修改评价记录';
+
+        // ✅ 回显创建/修改时间（替代 originalTimeDisplay）
+        const timeContainer = document.getElementById('timeInfoContainer');
+        const createLabel = document.getElementById('createTimeLabel');
+        const updateLabel = document.getElementById('updateTimeLabel');
+
+        timeContainer.style.display = 'flex';
+
+        // “优雅说法”：formatPreciseTime 只认 createdAt，就喂一个对象进去
+        createLabel.textContent = `🌱 创建于：${formatPreciseTime({ createdAt: rec.createdAt || rec.id })}`;
+        updateLabel.textContent = `🔄 修改于：${formatPreciseTime({ createdAt: rec.updatedAt || rec.createdAt || rec.id })}`;
+
+        els.mainCat.value = rec.mainCat;
+        const subs = categoryTree[rec.mainCat].subs;
+        els.subCat.innerHTML = '';
+        Object.keys(subs).forEach(subKey => els.subCat.add(new Option(subs[subKey], subKey)));
+        els.subCat.value = rec.subCat;
+        
+        els.workName.value = rec.name; 
+        if(!customStatuses.includes(rec.status)) els.status.add(new Option(rec.status, rec.status));
+        els.status.value = rec.status; 
+        els.review.value = rec.review;
+        
+        const voteStat = rec.voteStatus !== undefined ? rec.voteStatus : (rec.isProtect ? 1 : (rec.isVeto ? -1 : 0));
+        els.voteSlider.value = voteStat;
+        updateVoteUI(true); 
+
+        if (voteStat !== 0) {
+            const type = voteStat === 1 ? 'approve' : 'veto';
+            const wrapper = document.getElementById('voteReasonInputWrapper');
+            if (customVoteReasons[type].includes(rec.voteReason)) {
+                // 如果存的是预设，向上收起输入框
+                els.voteReasonSelect.value = rec.voteReason;
+                wrapper.style.maxHeight = '0';
+                wrapper.style.opacity = '0';
+                wrapper.style.marginTop = '0';
+                els.voteReasonInput.value = rec.voteReason;
+            } else {
+                // 如果存的是自定义，向下展开输入框
+                els.voteReasonSelect.value = '';
+                wrapper.style.maxHeight = '150px';
+                wrapper.style.opacity = '1';
+                wrapper.style.marginTop = '8px';
+                els.voteReasonInput.value = rec.voteReason || '';
+            }
+        }
+
+        els.voteScoreInput.value = rec.voteScore !== undefined ? rec.voteScore : (voteStat === 1 ? 10 : (voteStat === -1 ? 0 : ''));
+        activeScores = { ...rec.scores }; 
+
+    } else {
+        document.getElementById('modalTitle').textContent = '新增收视阅读记录';
+
+        // ✅ 新建时隐藏时间容器
+        document.getElementById('timeInfoContainer').style.display = 'none';
+
+        els.workName.value = '';
+        els.review.value = '';
+        els.status.selectedIndex = 0;
+        activeScores = {};
+        
+        els.voteSlider.value = 0;
+        els.voteScoreInput.value = '';
+        updateVoteUI(true);
+
+        if (currentMainFilter !== 'all') {
+            els.mainCat.value = currentMainFilter;
+            els.mainCat.onchange(); 
+            if (currentSubFilter !== 'all') els.subCat.value = currentSubFilter;
+        } else {
+            els.mainCat.selectedIndex = 0;
+            els.mainCat.onchange();
+        }
+    }
+    renderDimensions(); els.modal.classList.add('active'); document.body.style.overflow = 'hidden';
+    // 延迟 50ms 等待弹窗 CSS 动画渲染完成后，重新计算文本框高度，否则 scrollHeight 可能是错的
+    setTimeout(() => {
+        isRecordDirty = false;
+        if (typeof autoResizeTextarea === 'function') {
+            autoResizeTextarea(els.review); 
+            autoResizeTextarea(els.voteReasonInput); // 👈 追加这句：一票原因框也要回显撑开
+        }
+    }, 50);
+}
+
+// ================= 文本自动延展逻辑 =================
+const reviewInput = document.getElementById('reviewText');
+const autoResizeTextarea = (el) => {
+    el.style.height = 'auto'; // 先归零
+    el.style.height = (el.scrollHeight) + 'px'; // 根据内容撑开
+};
+reviewInput.addEventListener('input', function() {
+    autoResizeTextarea(this);
+});
+
+// ================= 沉浸式全屏写作 (Zen Mode) =================
+const zenOverlay = document.getElementById('zenOverlay');
+const zenReviewText = document.getElementById('zenReviewText');
+const zenSidebar = document.getElementById('zenSidebar');
+
+document.getElementById('openZenBtn').onclick = () => {
+    // 同步当前文本到全屏
+    zenReviewText.value = reviewInput.value;
+    // 渲染聪明的侧边栏
+    renderZenSidebar();
+    // 展开动画
+    zenOverlay.classList.add('active');
+    // 让光标自动聚焦到文本末尾
+    setTimeout(() => {
+        zenReviewText.focus();
+        zenReviewText.selectionStart = zenReviewText.value.length;
+    }, 100);
+};
+
+const closeZenMode = () => {
+    // 将全屏写的文字同步回原来的小框
+    reviewInput.value = zenReviewText.value;
+    autoResizeTextarea(reviewInput); // 重新计算小框高度
+    isRecordDirty = true;
+    zenOverlay.classList.remove('active');
+};
+document.getElementById('closeZenBtn').onclick = closeZenMode;
+zenReviewText.addEventListener('input', () => { isRecordDirty = true; });
+
+// 绘制侧边栏上下文
+function renderZenSidebar() {
+    const workName = els.workName.value || '未命名作品';
+    const finalScore = els.finalScore.innerHTML; 
+    const scoreColor = els.finalScore.style.color;
+    const voteVal = parseInt(els.voteSlider.value);
+    
+    let voteHtml = '';
+    if (voteVal === 1) {
+        const reason = els.voteReasonInput.value || els.voteReasonSelect.value || '无';
+        voteHtml = `<div style="background: var(--warning); color: #000; padding: 12px; border-radius: 8px; font-weight: 900; margin-bottom: 20px; font-size: 13px;">🌟 一票赞成: <br><span style="font-weight:normal; margin-top:4px; display:block;">${reason}</span></div>`;
+    } else if (voteVal === -1) {
+        const reason = els.voteReasonInput.value || els.voteReasonSelect.value || '无';
+        voteHtml = `<div style="background: var(--danger); color: #fff; padding: 12px; border-radius: 8px; font-weight: 900; margin-bottom: 20px; font-size: 13px;">💣 一票否决: <br><span style="font-weight:normal; margin-top:4px; display:block;">${reason}</span></div>`;
+    }
+
+    const schema = activeSchemas[els.subCat.value];
+    let barsHtml = `<div style="font-size:13px; font-weight:bold; margin-bottom:15px; color:var(--primary); border-bottom:1px solid var(--border-color); padding-bottom:8px;">📊 实时评价细分矩阵</div>`;
+    if (schema) {
+        schema.forEach(dim => {
+            let sum = 0;
+            dim.subs.forEach(s => sum += (activeScores[s.id] || 0));
+            const avg = sum / dim.subs.length;
+            const percent = (avg * 10).toFixed(0);
+
+            barsHtml += `
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: var(--text-main);">
+                        <span>${dim.name}</span>
+                        <span style="font-weight: 900;">${avg.toFixed(1)}</span>
+                    </div>
+                    <div style="height: 6px; background: var(--score-bg); border-radius: 3px; overflow: hidden;">
+                        <div style="height: 100%; background: var(--primary); width: ${percent}%; border-radius: 3px;"></div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    zenSidebar.innerHTML = `
+        <div style="font-size: 13px; color: var(--text-muted); font-weight: bold; margin-bottom: 5px;">正在评价</div>
+        <div style="font-size: 22px; font-weight: 900; color: var(--link-color); margin-bottom: 20px; line-height: 1.3;">${workName}</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">系统演算总分</div>
+        <div style="font-size: 48px; font-weight: 900; line-height: 1; margin-bottom: 25px; color: ${scoreColor}; font-family: 'Arial Black', Impact, sans-serif;">${finalScore}</div>
+        ${voteHtml}
+        ${barsHtml}
+    `;
+}
+
+function closeModal() { 
+    if(isRecordDirty) {
+        showConfirm('未保存警告', '你有尚未保存的修改，直接关闭将丢失这些修改。确定要放弃吗？', () => {
+            els.modal.classList.remove('active'); document.body.style.overflow = ''; isRecordDirty = false;
+        },
+        'warning'
+    );
+    } else { els.modal.classList.remove('active'); document.body.style.overflow = ''; }
+    
+}
+document.getElementById('fabAddBtn').onclick = () => openModal(null);
+document.getElementById('closeModalBtn').onclick = closeModal;
+
+document.getElementById('saveRecordBtn').onclick = () => {
+    // 1. 先提取并修剪名称
+    const newName = els.workName.value.trim(); 
+    
+    // 2. 校验是否为空
+    if(!newName) return showToast('作品名称不能为空！');
+
+    // 3. 重名校验引擎
+    let records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    
+    // 修复：确保使用刚才定义的 newName 变量
+    const isDuplicate = records.some(r => 
+        r.name.toLowerCase() === newName.toLowerCase() && r.id !== currentEditingId
+    );
+
+    if (isDuplicate) {
+        return showConfirm('作品重名警告', `馆内已存在名为《${newName}》的记录。为了数据唯一性，请修改名称（如加注年份、版本等）或直接编辑原记录。`, () => {
+            // 用户确认后不关闭窗口，留在原地修改
+        }, 'warning');
+    }
+
+    const voteVal = parseInt(els.voteSlider.value);
+    const voteReason = els.voteReasonInput.value.trim();
+    if (voteVal !== 0 && !voteReason) {
+        return showToast('启用一票机制时，必须填写具体判定原因！');
+    }
+
+    // 检查评价是否完整
+    let isScoreIncomplete = false;
+    let isReviewIncomplete = false;
+    if (voteVal === 0) {
+        const schema = activeSchemas[els.subCat.value];
+        schema.forEach(dim => dim.subs.forEach(s => {
+            if ((activeScores[s.id] || 0) === 0) isScoreIncomplete = true;
+        }));
+        if (!els.review.value.trim()) isReviewIncomplete = true;
+    }
+
+    const executeSave = () => {
+        const now = Date.now();
+        let finalCreatedAt = now; // 默认是现在
+        
+        if (currentEditingId) {
+            const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+            const oldRec = records.find(r => r.id === currentEditingId);
+            // 核心：如果是编辑，保留最初的创建时间；如果旧数据没这个字段，取 ID 为创建时间
+            if (oldRec) {
+                finalCreatedAt = oldRec.createdAt || parseInt(oldRec.id) || now;
+            }
+        }
+
+        const rec = {
+            id: currentEditingId || now.toString(), 
+            name: newName, 
+            mainCat: els.mainCat.value, 
+            subCat: els.subCat.value,
+            subCatText: els.subCat.options[els.subCat.selectedIndex].text, 
+            status: els.status.value, 
+            review: els.review.value,
+            voteStatus: voteVal, 
+            voteReason: voteVal !== 0 ? voteReason : '', 
+            voteScore: voteVal !== 0 ? parseFloat(els.voteScoreInput.value) : undefined,
+            isScoreIncomplete: isScoreIncomplete, 
+            isReviewIncomplete: isReviewIncomplete, 
+            scores: { ...activeScores }, 
+            finalScore: els.finalScore.getAttribute('data-score') || els.finalScore.textContent,
+            createdAt: finalCreatedAt, // 永恒坐标
+            updatedAt: now,            // 动态坐标
+            date: new Date(now).toLocaleDateString()
+        };
+        
+        let records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+        if (currentEditingId) {
+            const idx = records.findIndex(r => r.id === currentEditingId);
+            records[idx] = rec; 
+            showToast('修改已保存');
+        } else { 
+            records.unshift(rec); 
+            showToast('新作品入库成功'); 
+        }
+        
+        localStorage.setItem('ArchData_v2', JSON.stringify(records)); 
+        isRecordDirty = false; 
+        closeModal(); 
+        renderMainList();
+    };
+
+    if (voteVal === 0 && (isScoreIncomplete || isReviewIncomplete)) {
+        let msgArr = [];
+        if (isScoreIncomplete) msgArr.push('部分小项未打分');
+        if (isReviewIncomplete) msgArr.push('未填写深度评语');
+        showConfirm('评价暂未完成', `系统检测到该作品【${msgArr.join('、')}】。\n是否先作为「待完善」记录暂存入库？`, () => {
+            executeSave();
+        }, 'warning');
+    } else {
+        executeSave();
+    }
+};
+
+els.delBtn.onclick = () => {
+    showConfirm('删除确认', `确定要将《${els.workName.value}》彻底删除吗？此操作无法撤销。`, () => {
+        let records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+        records = records.filter(r => r.id !== currentEditingId);
+        localStorage.setItem('ArchData_v2', JSON.stringify(records));
+        showToast('记录已删除'); isRecordDirty = false; closeModal(); renderMainList();
+    },
+    'warning'
+);
+};
+
+// ================= 系统设置与框架管理 =================
+document.getElementById('openSettingsBtn').onclick = () => {
+    // 进入设置时，深拷贝一份当前的细则到缓冲区
+    schemaBuffer = JSON.parse(JSON.stringify(activeSchemas)); 
+
+    els.settingsModal.classList.add('active'); 
+    document.body.style.overflow = 'hidden';
+    els.editorCatSelect.innerHTML = '';
+    Object.keys(categoryTree).filter(k=>k!=='all').forEach(mainK => {
+        const optgroup = document.createElement('optgroup'); optgroup.label = categoryTree[mainK].name;
+        Object.keys(categoryTree[mainK].subs).forEach(subK => optgroup.appendChild(new Option(categoryTree[mainK].subs[subK], subK)));
+        els.editorCatSelect.appendChild(optgroup);
+    });
+    isSchemaDirty = false;
+    renderSchemaEditor();
+    renderStatusManager();
+    renderVoteReasonsManager();
+};
+
+function closeSettingsModal() {
+    if(isSchemaDirty) {
+        showConfirm('未保存警告', '你修改的评分细则尚未保存，确定要放弃修改吗？', () => {
+            els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; isSchemaDirty = false;
+        },
+        'warning'
+    );
+    } else { els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; }
+}
+document.getElementById('closeSettingsBtn').onclick = closeSettingsModal;
+
+document.querySelectorAll('.setting-menu-item').forEach(item => {
+    item.onclick = () => {
+        document.querySelectorAll('.setting-menu-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.setting-section').forEach(s => s.classList.remove('active'));
+        item.classList.add('active');
+        document.getElementById(item.dataset.target).classList.add('active');
+    };
+});
+
+els.themeSelect.onchange = (e) => { localStorage.setItem('themePref_v2', e.target.value); applyTheme(e.target.value); };
+
+// 新增：重置作品状态标签逻辑
+els.resetStatusBtn.onclick = () => {
+    showConfirm('重置状态确认', '将清空所有自定义的状态标签，并恢复为系统初始设置（如：已看、进行中等）。确定吗？', () => {
+        localStorage.removeItem('CustomStatuses_v2');
+        customStatuses = [...defaultStatuses]; // 恢复内存中的数据
+        renderStatusManager(); // 刷新设置里的列表
+        showToast('状态标签已恢复默认');
+    });
+};
+
+// 恢复出厂设置：双重弹窗与最后抢救机制
+const finalOverlay = document.getElementById('finalConfirmOverlay');
+
+document.getElementById('factoryResetBtn').onclick = () => {
+    // 第一重：调用我们刚刚升级过带倒计时的常规危险警告
+    showConfirm('高危操作：清空全部数据', '将清空所有已保存的评价记录！操作极其危险，请谨慎确认。', () => {
+        // 倒计时结束且用户点击确定后，触发第二重终极确认弹窗
+        finalOverlay.classList.add('active');
+    }, 'danger');
+};
+
+// 终极弹窗的内部逻辑
+document.getElementById('finalCancelBtn').onclick = () => {
+    finalOverlay.classList.remove('active');
+};
+
+document.getElementById('finalExportJsonBtn').onclick = () => {
+    // 直接触发我们在下拉菜单里写好的 JSON 导出功能
+    document.getElementById('exportJsonBtn').click();
+    showToast('✅ 抢救性备份已下载！');
+};
+
+document.getElementById('finalOkBtn').onclick = () => {
+    finalOverlay.classList.remove('active');
+    localStorage.removeItem('ArchData_v2'); 
+    showToast('💥 数据已全部清空，迎来新生'); 
+    renderMainList();
+};
+
+document.getElementById('resetSchemaBtn').onclick = () => {
+    showConfirm('重置细则确认', '将清空所有自定义的评分维度，恢复为官方默认状态。确定吗？', () => {
+        localStorage.removeItem('CustomSchemas_v2');
+        activeSchemas = JSON.parse(JSON.stringify(defaultSchemas_v2));
+        // 如果面板开着，同步更新缓冲区
+        if (schemaBuffer) schemaBuffer = JSON.parse(JSON.stringify(defaultSchemas_v2));
+        isSchemaDirty = false;
+        renderSchemaEditor();
+        showToast('细则已恢复默认');
+    });
+};
+
+els.editorCatSelect.onchange = () => {
+    if(isSchemaDirty) {
+        showConfirm('切换分类提示', '当前分类的修改未保存，切换将丢失修改。确定切换吗？', () => {
+            isSchemaDirty = false; renderSchemaEditor();
+        },
+        'warning'
+);
+    } else { renderSchemaEditor(); }
+};
+
+function renderSchemaEditor() {
+    const catKey = els.editorCatSelect.value;
+    // 关键：这里读取缓冲区的数据
+    const schema = schemaBuffer[catKey];
+    els.schemaEditor.innerHTML = '';
+    
+    schema.forEach((dim, dimIdx) => {
+        let subsHtml = '';
+        dim.subs.forEach((sub, subIdx) => {
+            subsHtml += `
+                <div class="editor-sub-row draggable-item" draggable="true" ondragstart="handleDragStart(event, 'schema_sub', ${subIdx}, ${dimIdx})" ondragover="handleDragOver(event, 'schema_sub', ${dimIdx})" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'schema_sub', ${subIdx}, ${dimIdx})" ondragend="handleDragEnd(event)">
+                    <div class="drag-handle" title="按住拖拽排序">☰</div>
+                    <input type="text" class="editor-sub-name-input" data-dim="${dimIdx}" data-sub="${subIdx}" data-type="name" value="${sub.name}" placeholder="小项名称">
+                    <input type="text" style="flex:1;" data-dim="${dimIdx}" data-sub="${subIdx}" data-type="desc" value="${sub.desc || ''}" placeholder="在这里输入问号悬浮释义...">
+                    <button class="btn-icon-del" style="font-size: 12px;" title="删除此小项" onclick="delSubItem('${catKey}', ${dimIdx}, ${subIdx})">✖</button>
+                </div>`;
+        });
+
+        const html = `
+            <div class="editor-dim-card draggable-item" draggable="true" ondragstart="handleDragStart(event, 'schema_dim', ${dimIdx})" ondragover="handleDragOver(event, 'schema_dim')" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'schema_dim', ${dimIdx})" ondragend="handleDragEnd(event)">
+                <div class="editor-dim-header">
+                    <div class="drag-handle" title="按住拖拽排序">☰</div>
+                    <input type="text" style="flex:1; font-weight:bold; font-size:15px;" data-dim="${dimIdx}" data-type="dimName" value="${dim.name}">
+                    <div class="weight-input-wrapper">
+                        <span>权重</span>
+                        <input type="number" class="editor-dim-weight-input" data-dim="${dimIdx}" data-type="weight" value="${Math.round(dim.weight * 100)}" min="0" max="100">
+                        <span>%</span>
+                    </div>
+                    <button class="btn-icon-del" style="font-size: 16px; margin-left: 5px;" title="删除此大类" onclick="delDimension('${catKey}', ${dimIdx})">✖</button>
+                </div>
+                <div>${subsHtml}</div>
+                <div class="editor-add-block" style="padding: 6px; margin: 10px 0 0 15px; font-size: 12px;" onclick="addSubItem('${catKey}', ${dimIdx})">+ 添加子项</div>
+            </div>`;
+        els.schemaEditor.insertAdjacentHTML('beforeend', html);
+    });
+    
+    els.schemaEditor.insertAdjacentHTML('beforeend', `<div class="editor-add-block" onclick="addDimension('${catKey}')">+ 新增大评分维度</div>`);
+    
+
+    // 实时同步 Input 到缓冲区，防止排序时丢失刚才填写的文字
+    els.schemaEditor.querySelectorAll('input').forEach(input => {
+        input.oninput = (e) => {
+            isSchemaDirty = true;
+            const d = e.target.dataset;
+            const val = e.target.value;
+            if(d.type === 'dimName') schema[d.dim].name = val;
+            else if(d.type === 'weight') schema[d.dim].weight = parseInt(val) / 100;
+            else if(d.type === 'name') schema[d.dim].subs[d.sub].name = val;
+            else if(d.type === 'desc') schema[d.dim].subs[d.sub].desc = val;
+        };
+    });
+}
+
+
+// 修复：精准恢复当前分类的默认细则，不再误伤全局
+window.triggerSchemaReset = () => {
+    const catKey = els.editorCatSelect.value;
+    const catName = els.editorCatSelect.options[els.editorCatSelect.selectedIndex].text;
+
+    showConfirm('重置确认', `确定要将【${catName}】的评分细则恢复为官方默认吗？此操作将立即覆盖并保存。`, () => {
+        // 仅从默认配置中深拷贝当前分类的数据
+        activeSchemas[catKey] = JSON.parse(JSON.stringify(defaultSchemas_v2[catKey]));
+        schemaBuffer[catKey] = JSON.parse(JSON.stringify(defaultSchemas_v2[catKey])); 
+        
+        // 将局部更新后的全局配置存回本地
+        localStorage.setItem('CustomSchemas_v2', JSON.stringify(activeSchemas));
+        
+        isSchemaDirty = false;
+        renderSchemaEditor();
+        showToast(`已恢复【${catName}】的默认细则`);
+    });
+};
+
+// --- 细则管理的逻辑函数 ---
+window.moveDimension = (cat, idx, dir) => {
+    const schema = schemaBuffer[cat]; // 修复：改为操作缓冲区
+    if (idx + dir < 0 || idx + dir >= schema.length) return;
+    const temp = schema[idx];
+    schema[idx] = schema[idx+dir];
+    schema[idx+dir] = temp;
+    isSchemaDirty = true; renderSchemaEditor();
+};
+window.delDimension = (cat, idx) => {
+    if(schemaBuffer[cat].length <= 1) return showToast('至少保留一个大类'); 
+    schemaBuffer[cat].splice(idx, 1); 
+    isSchemaDirty = true; 
+    renderSchemaEditor();
+    showToast('大类已移除 (未保存前均可撤销)'); // 给个轻量提示，增强安全感
+};
+window.addDimension = (cat) => {
+    schemaBuffer[cat].push({ id: 'dim_'+Date.now(), name: '新维度', weight: 0, subs: [{id: 'sub_'+Date.now(), name: '新子项', desc: ''}] }); // 修复：改为操作缓冲区
+    isSchemaDirty = true; renderSchemaEditor();
+};
+window.moveSubItem = (cat, dimIdx, subIdx, dir) => {
+    const subs = schemaBuffer[cat][dimIdx].subs; // 修复：改为操作缓冲区
+    if (subIdx + dir < 0 || subIdx + dir >= subs.length) return;
+    const temp = subs[subIdx];
+    subs[subIdx] = subs[subIdx+dir];
+    subs[subIdx+dir] = temp;
+    isSchemaDirty = true; renderSchemaEditor();
+};
+window.delSubItem = (cat, dimIdx, subIdx) => {
+    if(schemaBuffer[cat][dimIdx].subs.length <= 1) return showToast('至少保留一个子项'); // 修复：改为操作缓冲区
+    schemaBuffer[cat][dimIdx].subs.splice(subIdx, 1); // 修复：改为操作缓冲区
+    isSchemaDirty = true; renderSchemaEditor();
+};
+window.addSubItem = (cat, dimIdx) => {
+    schemaBuffer[cat][dimIdx].subs.push({ id: 'sub_'+Date.now(), name: '新子项', desc: '' }); // 修复：改为操作缓冲区
+    isSchemaDirty = true; renderSchemaEditor();
+};
+
+document.getElementById('saveSchemaBtn').onclick = () => {
+    const catKey = els.editorCatSelect.value;
+    const schema = schemaBuffer[catKey];
+    
+    // 校验权重
+    let weightSum = 0;
+    schema.forEach(dim => weightSum += Math.round(dim.weight * 100));
+    if (weightSum !== 100) return showToast(`⚠️ 权重总和必须为 100% (当前为 ${weightSum}%)`);
+
+    // 将缓冲区数据正式应用到 activeSchemas
+    activeSchemas = JSON.parse(JSON.stringify(schemaBuffer)); 
+    localStorage.setItem('CustomSchemas_v2', JSON.stringify(activeSchemas));
+    
+    isSchemaDirty = false;
+    showToast('✅ 系统评分框架已更新！');
+    renderSchemaEditor();
+};
+
+// ================= 全局拖拽排序引擎 (HTML5 D&D) =================
+let dragCtx = null;
+let dragScrollSpeed = 0;
+let dragScrollRAF = null;
+
+const doDragScroll = () => {
+    if (dragCtx && dragScrollSpeed !== 0) {
+        const box = document.querySelector('.settings-content');
+        if (box) box.scrollTop += dragScrollSpeed;
+    }
+    if (dragCtx) dragScrollRAF = requestAnimationFrame(doDragScroll);
+};
+
+window.handleDragStart = (e, type, idx, extra = null) => {
+    e.stopPropagation(); 
+    dragCtx = { type, idx, extra };
+    // 兼容优化：精准锁定拖拽包裹层
+    const item = e.target.closest('.draggable-item'); 
+    setTimeout(() => { if(item) item.classList.add('dragging'); }, 0); 
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', ''); 
+    
+    dragScrollSpeed = 0;
+    if (!dragScrollRAF) dragScrollRAF = requestAnimationFrame(doDragScroll);
+};
+
+window.handleDragOver = (e, type, extra = null) => {
+    if (!dragCtx || dragCtx.type !== type || dragCtx.extra !== extra) return;
+    e.preventDefault(); 
+    e.stopPropagation(); 
+    e.dataTransfer.dropEffect = 'move';
+    
+    // 🚀 终极防抖：先清除所有人的粉线，再精准给当前选中的人加上
+    document.querySelectorAll('.drop-over').forEach(el => el.classList.remove('drop-over'));
+    const item = e.target.closest('.draggable-item');
+    if (item) item.classList.add('drop-over'); 
+};
+
+window.handleDragLeave = (e) => {
+    e.stopPropagation();
+    // 依靠上面的精准清除逻辑，这里直接置空，彻底消灭嵌套子元素引发的闪烁 Bug！
+};
+
+window.handleDragEnd = (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('dragging', 'drop-over'));
+    dragCtx = null;
+    cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null;
+};
+
+window.handleDrop = (e, type, toIdx, extra = null) => {
+    if (!dragCtx || dragCtx.type !== type || dragCtx.extra !== extra) return;
+    e.preventDefault();
+    e.stopPropagation(); 
+    document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('drop-over'));
+    
+    const fromIdx = dragCtx.idx;
+    if (fromIdx === toIdx) { dragCtx = null; cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null; return; }
+
+    const moveArr = (arr, from, to) => {
+        const item = arr.splice(from, 1)[0];
+        arr.splice(to, 0, item);
+    };
+
+    if (type === 'status') {
+        moveArr(customStatuses, fromIdx, toIdx);
+        localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
+        renderStatusManager();
+    } else if (type === 'vote_approve') {
+        moveArr(customVoteReasons.approve, fromIdx, toIdx);
+        localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+        renderVoteReasonsManager();
+    } else if (type === 'vote_veto') {
+        moveArr(customVoteReasons.veto, fromIdx, toIdx);
+        localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+        renderVoteReasonsManager();
+    } else if (type === 'schema_dim') {
+        const catKey = els.editorCatSelect.value;
+        moveArr(schemaBuffer[catKey], fromIdx, toIdx);
+        isSchemaDirty = true; renderSchemaEditor();
+    } else if (type === 'schema_sub') {
+        const catKey = els.editorCatSelect.value;
+        moveArr(schemaBuffer[catKey][extra].subs, fromIdx, toIdx);
+        isSchemaDirty = true; renderSchemaEditor();
+    }
+    dragCtx = null;
+    cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null;
+};
+
+// ================= 拖拽时的边缘平滑滚动增强 (突破原生限制版) =================
+window.addEventListener('dragover', (e) => {
+    if (!dragCtx) return;
+    const box = document.querySelector('.settings-content');
+    if (!box) return;
+
+    const rect = box.getBoundingClientRect();
+    // 🚀 大类优化：感应区从 100 扩大到 160px，只要稍微靠近边缘就能起飞
+    const buffer = 160; 
+
+    // 🚀 速度优化：极限速度拉升至 35px/帧，大距离跨越毫无压力
+    if (e.clientY > 0 && e.clientY < rect.top + buffer) {
+        dragScrollSpeed = -Math.min(35, (buffer - (e.clientY - rect.top)) * 0.5);
+    } else if (e.clientY > 0 && e.clientY > rect.bottom - buffer) {
+        dragScrollSpeed = Math.min(35, (buffer - (rect.bottom - e.clientY)) * 0.5);
+    } else {
+        dragScrollSpeed = 0; 
+    }
+}, true);
+
+// --- 状态标签管理 ---
+function renderStatusManager() {
+    els.statusList.innerHTML = '';
+    customStatuses.forEach((status, idx) => {
+        const div = document.createElement('div'); 
+        div.className = 'status-item draggable-item';
+        
+        // 绑定原生拖拽生命周期
+        div.draggable = true;
+        div.ondragstart = (e) => handleDragStart(e, 'status', idx);
+        div.ondragover = (e) => handleDragOver(e, 'status');
+        div.ondragleave = handleDragLeave;
+        div.ondrop = (e) => handleDrop(e, 'status', idx);
+        div.ondragend = handleDragEnd;
+        
+        div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:5px;">
+                <div class="drag-handle" title="按住拖拽排序">☰</div>
+                <span>${status}</span>
+            </div>
+            <button class="btn-icon-del" onclick="delStatus(${idx})">✖</button>
+        `;
+        els.statusList.appendChild(div);
+    });
+    // 底部复刻重置按钮
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn-danger-outline';
+    resetBtn.style.cssText = "width:100%; margin-top:20px; border-style:dashed;";
+    resetBtn.textContent = "⚠️ 恢复默认状态列表";
+    resetBtn.onclick = () => els.resetStatusBtn.click();
+    els.statusList.appendChild(resetBtn);
+}
+
+window.moveStatus = (idx, dir) => {
+    if (idx + dir < 0 || idx + dir >= customStatuses.length) return;
+    const temp = customStatuses[idx];
+    customStatuses[idx] = customStatuses[idx+dir];
+    customStatuses[idx+dir] = temp;
+    localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
+    renderStatusManager();
+};
+
+document.getElementById('addStatusBtn').onclick = () => {
+    const input = document.getElementById('newStatusInput');
+    const val = input.value.trim();
+    if(!val) return;
+    if(customStatuses.includes(val)) return showToast('该状态已存在');
+    customStatuses.push(val);
+    localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
+    input.value = ''; renderStatusManager(); showToast('状态已添加');
+};
+
+window.delStatus = function(idx) {
+    if(customStatuses.length <= 1) return showToast('至少保留一个状态标签');
+    customStatuses.splice(idx, 1);
+    localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
+    renderStatusManager();
+}
+
+// ================= 精确时间提取工具 =================
+function formatPreciseTime(rec) {
+    // 从底层 id 或 createdAt 提取毫秒级时间戳
+    const ts = parseInt(rec.createdAt || rec.id); 
+    if (ts && !isNaN(ts) && ts > 1000000000000) {
+        const d = new Date(ts);
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+    return rec.date; // 如果解析失败，兜底返回旧版短日期
+}
+
+// ================= 导出引擎 (CSV / TXT) =================
+function getExportFilename(ext) {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    // 在这里加上了 getSeconds()
+    const timeStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    return `牛人影音志_v${APP_VERSION}_${timeStr}.${ext}`;
+}
+
+function generateExportData() {
+    const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    if(records.length === 0) { showToast('暂无数据可导出'); return null; }
+    return records;
+}
+
+// 导出 CSV
+document.getElementById('exportCsvBtn').onclick = () => {
+    const records = generateExportData(); if(!records) return;
+    let csv = "data:text/csv;charset=utf-8,\uFEFF";
+    csv += "大类,细分分类,作品名称,状态,系统得分,豆瓣星级,Bangumi评级,一票赞成,一票否决,一票原因,待完善标签,详细评分数据,评语,添加日期\n";
+    records.forEach(r => { 
+        const mainCatName = categoryTree[r.mainCat] ? categoryTree[r.mainCat].name : r.mainCat;
+        let details = [];
+        if(activeSchemas[r.subCat]) {
+            activeSchemas[r.subCat].forEach(dim => {
+                dim.subs.forEach(sub => { if(r.scores && r.scores[sub.id] !== undefined) details.push(`${sub.name}:${r.scores[sub.id]}`); });
+            });
+        }
+        const hasScore = r.finalScore > 0 || r.isVeto || r.voteStatus === -1;
+        const dStar = hasScore ? renderStars(r.finalScore) : "未评";
+        const bLabel = hasScore ? getBangumiLabel(r.finalScore, true) : "未评";
+        
+        const isProtectStr = (r.voteStatus === 1 || r.isProtect) ? "是" : "否";
+        const isVetoStr = (r.voteStatus === -1 || r.isVeto) ? "是" : "否";
+        
+        let incompleteStr = [];
+        if (r.isScoreIncomplete) incompleteStr.push("缺分数");
+        if (r.isReviewIncomplete) incompleteStr.push("无评语");
+
+        let safeReview = (r.review || '').replace(/"/g, '""').replace(/\n/g, ' '); 
+        csv += `"${mainCatName}","${r.subCatText}","${r.name}","${r.status}",${r.finalScore},"${dStar}","${bLabel}",${isProtectStr},${isVetoStr},"${r.voteReason || ''}","${incompleteStr.join('|')}","${details.join(' | ')}","${safeReview}","${formatPreciseTime(r)}"\n`; 
+    });
+    triggerDownload(csv, getExportFilename('csv'));
+};
+
+// 导出 TXT (排版优化的阅读版)
+document.getElementById('exportTxtBtn').onclick = () => {
+    const records = generateExportData(); if(!records) return;
+    let txtStr = `=================================================\n`;
+    txtStr += ` 牛人影音志 档案备份 (v${APP_VERSION})\n`;
+    txtStr += ` 导出时间: ${new Date().toLocaleString()}\n`;
+    txtStr += ` 共计收录: ${records.length} 部作品\n`;
+    txtStr += `=================================================\n\n`;
+
+    records.forEach(r => {
+        const mainCatName = categoryTree[r.mainCat] ? categoryTree[r.mainCat].name : r.mainCat;
+        txtStr += `【 ${r.name} 】\n`;
+        txtStr += `> 分类：${mainCatName} - ${r.subCatText}\n`;
+        txtStr += `> 状态：${r.status}  |  入库时间：${formatPreciseTime(r)}\n`;
+        
+        const hasScore = r.finalScore > 0 || r.isVeto || r.voteStatus === -1;
+        if (hasScore) {
+            txtStr += `> 综合得分：${r.finalScore}  (豆瓣: ${renderStars(r.finalScore)} | Bangumi: ${getBangumiLabel(r.finalScore, true)})\n`;
+        } else {
+            txtStr += `> 综合得分：未评级\n`;
+        }
+
+        if (r.voteStatus === 1 || r.isProtect) txtStr += `> 特殊判定：🌟 一票赞成 (${r.voteReason || '无'})\n`;
+        if (r.voteStatus === -1 || r.isVeto) txtStr += `> 特殊判定：💣 一票否决 (${r.voteReason || '无'})\n`;
+
+        let details = [];
+        if(activeSchemas[r.subCat]) {
+            activeSchemas[r.subCat].forEach(dim => {
+                dim.subs.forEach(sub => { if(r.scores && r.scores[sub.id] !== undefined) details.push(`${sub.name}:${r.scores[sub.id]}`); });
+            });
+        }
+        if (details.length > 0) txtStr += `> 小项明细：${details.join(' | ')}\n`;
+        
+        txtStr += `> 深度剖析：\n${r.review || '暂无详细评语...'}\n`;
+        txtStr += `-------------------------------------------------\n\n`;
+    });
+
+    // 转换为 Data URL
+    const txtData = "data:text/plain;charset=utf-8,\uFEFF" + encodeURIComponent(txtStr);
+    triggerDownload(txtData, getExportFilename('txt'));
+};
+
+// 导出 JSON (全量无损存档，包含所有自定义设置与记录)
+document.getElementById('exportJsonBtn').onclick = () => {
+    // 读取数据，即便是空数据（还没打过分），也允许导出自定义的细则框架
+    const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    
+    // 收集所有系统层面的自定义配置
+    const settings = {
+        customSchemas: activeSchemas, 
+        customStatuses: customStatuses,
+        customVoteReasons: customVoteReasons, 
+        theme: localStorage.getItem('themePref_v2') || 'auto',
+        displayMode: localStorage.getItem('displayModePref_v2') || 'system',
+        timeDisplayMode: localStorage.getItem('timeDisplayPref_v2') || 'updated',
+        confirmDelayPrefs: JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}')
+    };
+
+    // 组装标准化的“系统级存档结构”
+    const fullArchive = {
+        meta: {
+            app: "NiurenMediaLog", // 标识印记
+            version: APP_VERSION,  // 记录导出时的版本号，方便未来做跨版本兼容
+            exportTime: Date.now()
+        },
+        settings: settings,        // 客制化设置包
+        data: records              // 核心记录包
+    };
+    
+    const jsonStr = JSON.stringify(fullArchive, null, 2);
+    const dataUrl = "data:application/json;charset=utf-8,\uFEFF" + encodeURIComponent(jsonStr);
+    
+    triggerDownload(dataUrl, getExportFilename('json'));
+};
+
+// 导入 JSON (解析全量存档并覆盖本地数据)
+document.getElementById('importJsonFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const importedData = JSON.parse(event.target.result);
+            
+            // 1. 校验文件指纹，防止导入无关 JSON
+            if (!importedData.meta || importedData.meta.app !== "NiurenMediaLog") {
+                e.target.value = ''; // 重置 input
+                return showToast('❌ 导入失败：无法识别的牛人影音志存档格式');
+            }
+
+            // 2. 触发高危倒计时弹窗拦截
+            showConfirm('数据覆盖警告', `识别到来自 v${importedData.meta.version} 版本的存档。导入将直接覆盖你当前所有的评价记录和自定义设置。强烈建议在此之前先导出一份当前数据的 JSON 备用。确定要继续吗？`, () => {
+                
+                // --- 开始核爆级覆盖还原 ---
+                
+                // 恢复打分记录
+                if (importedData.data) {
+                    localStorage.setItem('ArchData_v2', JSON.stringify(importedData.data));
+                }
+
+                // 恢复自定义客制化设置
+                if (importedData.settings) {
+                    if (importedData.settings.customSchemas) {
+                        activeSchemas = importedData.settings.customSchemas;
+                        localStorage.setItem('CustomSchemas_v2', JSON.stringify(activeSchemas));
+                    }
+                    if (importedData.settings.customStatuses) {
+                        customStatuses = importedData.settings.customStatuses;
+                        localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
+                    }
+                    // 👇 新增这一块：解析并恢复一票词条设置
+                    if (importedData.settings.customVoteReasons) {
+                        customVoteReasons = importedData.settings.customVoteReasons;
+                        localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+                    }
+                    // 👆 新增结束
+                    if (importedData.settings.theme) {
+                        localStorage.setItem('themePref_v2', importedData.settings.theme);
+                        els.themeSelect.value = importedData.settings.theme;
+                        applyTheme(importedData.settings.theme);
+                    }
+                    if (importedData.settings.displayMode) {
+                        localStorage.setItem('displayModePref_v2', importedData.settings.displayMode);
+                        els.displayModeSelect.value = importedData.settings.displayMode;
+                    }
+                    // 👇 新增：导入时恢复时间显示偏好
+                    if (importedData.settings.timeDisplayMode) {
+                        localStorage.setItem('timeDisplayPref_v2', importedData.settings.timeDisplayMode);
+                        if (document.getElementById('timeDisplayModeSelect')) {
+                            document.getElementById('timeDisplayModeSelect').value = importedData.settings.timeDisplayMode;
+                        }
+                    }
+                    if (importedData.settings.confirmDelayPrefs) {
+                        localStorage.setItem('confirmDelayPrefs_v2', JSON.stringify(importedData.settings.confirmDelayPrefs));
+                        document.getElementById('delayDangerInput').value = importedData.settings.confirmDelayPrefs.danger;
+                        document.getElementById('delayWarningInput').value = importedData.settings.confirmDelayPrefs.warning;
+                    }
+                }
+
+                showToast('✅ 存档导入成功！正在重载数据...');
+                e.target.value = ''; // 重置 input，允许重新导入同一个文件
+                
+                // 3. 内存变量与 UI 界面热更新
+                renderMainList();
+                renderStatusManager();
+                renderVoteReasonsManager(); // 👈 补上这句！刷新一票词条 UI
+                if (els.settingsModal.classList.contains('active')) {
+                    schemaBuffer = JSON.parse(JSON.stringify(activeSchemas)); // 同步最新框架到缓冲区
+                    renderSchemaEditor();
+                }
+            }, 'danger'); // 属于高危操作，调用防手滑倒计时
+
+        } catch (err) {
+            showToast('❌ 读取失败：JSON 文件解析异常或已损坏');
+            console.error(err);
+            e.target.value = '';
+        }
+    };
+    reader.readAsText(file);
+});
+
+function triggerDownload(dataUrl, filename) {
+    const link = document.createElement("a"); 
+    link.href = dataUrl; 
+    link.download = filename; 
+    document.body.appendChild(link); 
+    link.click(); 
+    document.body.removeChild(link); 
+    showToast(`成功导出：${filename}`);
+}
+
+// ================= 新手教程 =================
+const tutData = [
+    { img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80', title: '欢迎来到牛人影音志', desc: '告别一拍脑袋的打分！在这里，我们用十余种专属分类、几十套精细的评价维度，为你建立最严谨的私人精神食粮档案馆。' },
+    { img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80', title: '10分制加权算法与一票机制', desc: '每一个细分项都将参与最终加权计算。鼠标悬浮在 ❓ 号上可查看释义。遇到意义非凡或触碰底线的作品？果断使用“白月光”与“踩雷”一票机制。' },
+    { img: 'https://images.unsplash.com/photo-1588421357574-87938a86fa28?auto=format&fit=crop&w=600&q=80', title: '属于你的私人定制', desc: '在【系统设置】中，你可以自由修改每一个评分维度、权重、释义，甚至自定义“搁置”、“二刷中”等作品状态，打造你的终极评价体系。' }
+];
+let tutIndex = 0;
+
+function updateTutorial() {
+    document.getElementById('tutImg').src = tutData[tutIndex].img;
+    document.getElementById('tutTitle').textContent = tutData[tutIndex].title;
+    document.getElementById('tutDesc').textContent = tutData[tutIndex].desc;
+    document.querySelectorAll('.tut-dot').forEach((d, i) => { d.className = i === tutIndex ? 'tut-dot active' : 'tut-dot'; });
+    document.getElementById('tutPrevBtn').style.opacity = tutIndex === 0 ? '0' : '1';
+    document.getElementById('tutPrevBtn').style.pointerEvents = tutIndex === 0 ? 'none' : 'auto';
+    document.getElementById('tutNextBtn').textContent = tutIndex === tutData.length - 1 ? '开始使用' : '下一步';
+}
+
+function openTutorial() {
+    tutIndex = 0; updateTutorial();
+    document.getElementById('tutorialOverlay').classList.add('active');
+}
+
+document.getElementById('tutPrevBtn').onclick = () => { if(tutIndex > 0) { tutIndex--; updateTutorial(); } };
+document.getElementById('tutNextBtn').onclick = () => { 
+    if(tutIndex < tutData.length - 1) { tutIndex++; updateTutorial(); } 
+    else { 
+        document.getElementById('tutorialOverlay').classList.remove('active'); 
+        localStorage.setItem('hasSeenTutorial_v2', 'true');
+    }
+};
+
+document.getElementById('reopenTutorialBtn').onclick = () => {
+    els.settingsModal.classList.remove('active'); document.body.style.overflow = '';
+    openTutorial();
+};
+
+// ================= 全局快捷键与遮罩层点击关闭 =================
+// 1. 点击遮罩层(空白磨砂处)关闭弹窗
+els.modal.addEventListener('click', (e) => {
+    if (e.target === els.modal) closeModal();
+});
+
+els.settingsModal.addEventListener('click', (e) => {
+    if (e.target === els.settingsModal) closeSettingsModal();
+});
+
+const tutOverlayEl = document.getElementById('tutorialOverlay');
+tutOverlayEl.addEventListener('click', (e) => {
+    if (e.target === tutOverlayEl) {
+        tutOverlayEl.classList.remove('active');
+        localStorage.setItem('hasSeenTutorial_v2', 'true');
+    }
+});
+
+// 针对防呆二次确认弹窗，点击外面等同于点击“取消”
+document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('confirmOverlay')) {
+        document.getElementById('confirmCancelBtn').click();
+    }
+});
+
+document.getElementById('finalConfirmOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('finalConfirmOverlay')) {
+        document.getElementById('finalCancelBtn').click();
+    }
+});
+
+// 2. 监听 ESC 键关闭弹窗
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        // 按照 UI 层级从高到低依次拦截，防止一次按键关掉所有窗口
+        
+        // 层级 0：沉浸式全屏写作模式
+        if (document.getElementById('zenOverlay').classList.contains('active')) {
+            closeZenMode();
+            return;
+        }
+
+        // 层级 1：终极警告弹窗
+        if (document.getElementById('finalConfirmOverlay').classList.contains('active')) {
+            document.getElementById('finalCancelBtn').click();
+            return;
+        }
+        // 层级 2：普通警告弹窗
+        if (document.getElementById('confirmOverlay').classList.contains('active')) {
+            document.getElementById('confirmCancelBtn').click();
+            return;
+        }
+        // 层级 3：新手教程
+        if (tutOverlayEl.classList.contains('active')) {
+            tutOverlayEl.classList.remove('active');
+            localStorage.setItem('hasSeenTutorial_v2', 'true');
+            return;
+        }
+        // 层级 4：设置面板
+        if (els.settingsModal.classList.contains('active')) {
+            closeSettingsModal();
+            return;
+        }
+        // 层级 5：评价编辑面板
+        if (els.modal.classList.contains('active')) {
+            closeModal();
+            return;
+        }
+        // 层级 6：数据看板
+        if (document.getElementById('dashboardModal').classList.contains('active')) {
+            document.getElementById('dashboardModal').classList.remove('active');
+            document.body.style.overflow = '';
+            return;
+        }
+    }
+});
+
+// 点击外部关闭数据看板
+document.getElementById('dashboardModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('dashboardModal')) {
+        document.getElementById('dashboardModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
+
+// ================= 数据洞察看板核心引擎 =================
+let dashCatChartInst = null;
+let dashScoreChartInst = null;
+
+document.getElementById('openDashboardBtn').onclick = () => {
+    document.getElementById('dashboardModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    renderDashboardData();
+};
+
+document.getElementById('closeDashboardBtn').onclick = () => {
+    document.getElementById('dashboardModal').classList.remove('active');
+    document.body.style.overflow = '';
+};
+
+function renderDashboardData() {
+    const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    
+    // 1. 顶部基础数据计算
+    document.getElementById('dashTotal').textContent = records.length;
+    
+    const scoredRecs = records.filter(r => (parseFloat(r.finalScore) > 0 || r.voteStatus !== 0) && !r.isScoreIncomplete);
+    const avg = scoredRecs.length ? (scoredRecs.reduce((sum, r) => sum + parseFloat(r.finalScore), 0) / scoredRecs.length).toFixed(1) : '0.0';
+    document.getElementById('dashAvgScore').textContent = avg;
+
+    document.getElementById('dashApprove').textContent = records.filter(r => r.voteStatus === 1).length;
+    document.getElementById('dashVeto').textContent = records.filter(r => r.voteStatus === -1).length;
+
+    // 👇 新增：计算最常打的分数 (众数算法)
+    let mostFreqScore = '暂无';
+    if (scoredRecs.length > 0) {
+        const scoreCounts = {};
+        scoredRecs.forEach(r => {
+            const s = parseFloat(r.finalScore).toFixed(1);
+            scoreCounts[s] = (scoreCounts[s] || 0) + 1;
+        });
+        // 找出出现次数最多的分数
+        mostFreqScore = Object.keys(scoreCounts).reduce((a, b) => scoreCounts[a] > scoreCounts[b] ? a : b);
+    }
+    document.getElementById('dashMostFreqScore').textContent = mostFreqScore;
+
+    if (records.length === 0) return; // 无数据直接返回
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#e2e8f0' : '#2c3e50';
+    const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+    // 2. 饼图：领域分布演算
+    const catCounts = {};
+    records.forEach(r => {
+        const name = categoryTree[r.mainCat] ? categoryTree[r.mainCat].name : '其他';
+        catCounts[name] = (catCounts[name] || 0) + 1;
+    });
+    
+    if(dashCatChartInst) dashCatChartInst.destroy();
+    dashCatChartInst = new Chart(document.getElementById('dashCatChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(catCounts),
+            datasets: [{
+                data: Object.values(catCounts),
+                backgroundColor: ['#f09199', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22'],
+                borderWidth: isDark ? 2 : 0, borderColor: isDark ? '#1e1e1e' : '#fff'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: textColor, font: {size: 11} } } } }
+    });
+
+    // 3. 柱状图：评分分布演算 (区间分段)
+    const scoreBins = {'9-10分(神作)':0, '8-9分(优秀)':0, '7-8分(良好)':0, '6-7分(及格)':0, '6分以下(雷区)':0};
+    scoredRecs.forEach(r => {
+        const s = parseFloat(r.finalScore);
+        if(s >= 9) scoreBins['9-10分(神作)']++;
+        else if(s >= 8) scoreBins['8-9分(优秀)']++;
+        else if(s >= 7) scoreBins['7-8分(良好)']++;
+        else if(s >= 6) scoreBins['6-7分(及格)']++;
+        else scoreBins['6分以下(雷区)']++;
+    });
+
+    if(dashScoreChartInst) dashScoreChartInst.destroy();
+    dashScoreChartInst = new Chart(document.getElementById('dashScoreChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(scoreBins),
+            datasets: [{
+                label: '作品数量',
+                data: Object.values(scoreBins),
+                backgroundColor: ['#f09199', '#3498db', '#f1c40f', '#bdc3c7', '#e74c3c'],
+                borderRadius: 6
+            }]
+        },
+        options: { 
+            responsive: true, maintainAspectRatio: false, 
+            plugins: { legend: { display: false } },
+            scales: { 
+                y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor, font: {size: 11} }, grid: { display: false } }
+            }
+        }
+    });
+
+    // 4. 荣誉墙演算 (Top 3 & Bottom 3)
+    const sortedRecs = [...scoredRecs].sort((a,b) => parseFloat(b.finalScore) - parseFloat(a.finalScore));
+    const top3 = sortedRecs.slice(0, 3);
+    const bottom3 = [...sortedRecs].reverse().slice(0, 3);
+
+    const renderHof = (arr, containerId, defaultColor) => {
+        const html = arr.length > 0 ? arr.map(r => {
+            let color = defaultColor;
+            if(r.voteStatus === 1) color = 'var(--warning)';
+            if(r.voteStatus === -1) color = 'var(--danger)';
+            return `<div class="hof-item">
+                        <span class="hof-name" title="${r.name}">${r.name}</span>
+                        <span class="hof-score" style="color: ${color};">${parseFloat(r.finalScore).toFixed(1)}</span>
+                    </div>`;
+        }).join('') : '<div style="text-align:center; color:var(--text-muted); padding: 10px 0;">暂无足够数据</div>';
+        document.getElementById(containerId).innerHTML = html;
+    };
+
+    renderHof(top3, 'hofTopList', '#f39c12');
+    renderHof(bottom3, 'hofBottomList', '#e74c3c');
+}
+
+// ================= 页面级防丢拦截 (意外刷新/关闭标签页) =================
+window.addEventListener('beforeunload', (e) => {
+    // 如果评价面板或细则设置面板有未保存的脏数据
+    if (isRecordDirty || isSchemaDirty) {
+        // 触发浏览器原生的关闭确认弹窗（现代浏览器会统一显示标准警告文案）
+        e.preventDefault();
+        e.returnValue = ''; 
+    }
+});
+
+init();
