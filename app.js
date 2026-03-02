@@ -1,4 +1,10 @@
-// 🚀 牛人影音志 v1.2.2 - 开始云端进化！
+// 🚀 [更新中] 牛人影音志 v1.2.2 - 开始云端进化！
+
+// 🌟 1. 唤醒 Supabase 云端心脏
+const SUPABASE_URL = 'https://ytyioshanxbamrgahdgu.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_gf0ESfEYeYLZ9lXKTIDcsQ_TfHHEeFv';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 
 // ================= 系统版本与更新日志配置中心 =================
     // 💡 以后每次更新，只需要在这个数组的最前面加一块大括号 { version: '...', changes: ['...'] }
@@ -2312,5 +2318,28 @@ window.addEventListener('beforeunload', (e) => {
         e.returnValue = ''; 
     }
 });
+
+// ================= 云端迁移专用工具 =================
+window.migrateToCloud = async () => {
+    // 1. 从本地挖出老数据
+    const localData = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    
+    if (localData.length === 0) {
+        return alert("本地没有找到数据，无需搬家！");
+    }
+
+    console.log(`🚚 检测到 ${localData.length} 条本地记录，正在发往云端...`);
+    
+    // 2. 批量推送到 Supabase 的 records 表中
+    const { error } = await supabaseClient.from('records').upsert(localData);
+    
+    if (error) {
+        console.error("❌ 搬家失败:", error);
+        alert("搬家失败，请按 F12 查看控制台报错: " + error.message);
+    } else {
+        alert("✅ 恭喜牛人！所有本地记录已成功升入云端！");
+        console.log("数据已全部就位！");
+    }
+};
 
 init();
