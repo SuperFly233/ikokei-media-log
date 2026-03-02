@@ -1,52 +1,31 @@
-// 🚀 [更新中] 牛人影音志 v1.2.2 - 开始云端进化！
+// 🚀 牛人影音志 v1.3.0 - 满血云端版
 
 // 🌟 1. 唤醒 Supabase 云端心脏
-const SUPABASE_URL = 'https://ytyioshanxbamrgahdgu.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_gf0ESfEYeYLZ9lXKTIDcsQ_TfHHEeFv';
+const SUPABASE_URL = '在这里填入你的_Project_URL'; 
+const SUPABASE_ANON_KEY = '在这里填入你的_anon_public_key'; 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-
 // ================= 系统版本与更新日志配置中心 =================
-    // 💡 以后每次更新，只需要在这个数组的最前面加一块大括号 { version: '...', changes: ['...'] }
-    // 系统会自动把第一个作为 APP_VERSION，并自动生成 HTML 排版！
-    const APP_CHANGELOG = [{
+const APP_CHANGELOG = [
+    {
+        version: '1.3.0',
+        date: '2026/3/2',
+        changes: [
+            '[✨里程碑] 彻底云端化跃升：系统正式接入 Supabase 云端数据库！告别本地浏览器缓存，实现多设备、跨平台的实时无缝同步。',
+            '[新特性] 引入全局云端状态引擎：所有增删改操作均直连云端，网页初始化及每次操作后自动静默拉取最新数据。',
+            '[优化] 全局网络防抖与优雅加载：针对云端延迟，为“保存”、“删除”、“清空”等核心按钮引入异步防触控锁与 Loading 动效，彻底杜绝因网络延迟导致的连续点击与数据重复。',
+            '[优化] 强化云端交互反馈：网页启动时及网络操作后增加明确的 Toast 提示，附带精准时间戳，时刻掌握数据同步状态。'
+        ]
+    },
+    {
         version: '1.2.1',
         date: '2026/3/2',
         changes: [
-            '[✨里程碑] 磅礴上线「个人数据洞察看板」：点击顶部导航栏即可开启全屏统计中心。内置 Chart.js 双引擎渲染，支持实时呈现【领域涉猎饼图】、【全站评分正态分布曲线】，并自动演算“全站平均分”、“最常打的分数”、“殿堂级神作 TOP 3”与“灾难级避雷 BOT 3”等核心参数。你的精神食粮，此刻一览无遗！',
-            '[新特性] 生态闭环：系统设置新增「导入/导出 JSON 存档」功能。一键无损还原全量打分数据、专属分类框架与界面偏好，完美实现多设备无缝漫游！',
-            '[新特性] 引入强力“安全锁”机制：所有二次确认弹窗（如高危删除、未保存警告）新增防手滑倒计时。支持在设置中针对“高危操作”和“一般警告”分别自定义倒计时长。',
-            '[新特性] 「一票机制词条」支持完全客制化。该功能已精简合并至“评分细则管理”面板下方，允许全局增删改预设的一票原因，并全面接入 JSON 存档同步系统。',
-            '[新特性] 独创「沉浸式全屏写作 (Zen Mode)」：在评语栏点击开启全屏打字机模式。左侧智能停靠“上下文面板”（实时显示当前作品名、总分、细分条形图及一票状态），右侧提供无干扰广阔写作区。',
-            '[新特性] 引入「智能重名预警」：输入作品名时系统将实时检索馆藏。若发现重复，输入框下方将弹出微型“传送门”链接，支持点击后无缝跳转至原记录，极速排重。',
-            '[新特性] 编辑页面新增「原始时间追溯」：在修改评价时，弹窗顶部将直观显示该作品的原始入库时间，方便进行纵向回顾。',
-            '[新特性] 引入“时空双轴”管理系统：评价记录现已区分「创建时间」与「修改时间」。编辑旧条目时将完美保留原始入库印记，并实时更新最新活动时间。',
-            '[新特性] 排序与显示模式自由化：右上角新增针对“创建时间”与“修改时间”的四种细分排序；系统设置中支持自由切换卡片上默认显示的时间维度。',
-            // 👇 追加到 1.2.1 的最后
-            '[新特性] 交互大升级：引入自主研发的原生 HTML5 拖拽引擎。系统设置中的「评分细则」、「状态标签」、「一票词条」彻底告别繁琐的点击上下移，全面支持丝滑的拖拽重排。在被拖拽元素经过的位置会优雅地显示蓝线插入点提示，尽享指尖掌控感！',
-            '[优化] 优化评分细则面板的 UI 布局，将“保存”按钮置于“恢复默认”上方，防呆防误触。',
-            '[优化] 强化「恢复出厂设置」的安全防御机制：引入双重弹窗拦截（叠加倒计时共需三次确认），并在最后关头提供「导出 JSON 存档」的抢救按钮，彻底杜绝误删悲剧。',
-            '[优化] 优化细则释义气泡的 UI 表现，文本采用居中对齐，提升视觉平衡感。',
-            '[优化] 全面美化「版本更新日志」面板，引入语义化彩色徽章（蓝色的新特性 / 橙色的优化 / 红色的修复），大幅提升信息读取的效率与优雅度。',
-            '[优化] 提升桌面端交互体验：全面支持点击弹窗外部（磨砂遮罩层）或按 ESC 键快速关闭编辑、设置及教程面板。该操作已与防呆拦截系统打通，未保存时仍会安全唤起警告。',
-            '[优化] 优化搜索与筛选体验：在顶部导航栏切换大分类时，将自动清空当前搜索关键词与状态筛选，防止数据遮蔽误导。',
-            '[优化] 优化「一票机制」原因选择的视觉交互：选中预设原因时，下拉框会自动平滑拉长填满区域，防止长文本截断；在切换回“自定义”时优雅复原，空间利用率拉满。',
-            '[优化] 评语输入框支持智能延展：默认收起为小巧的两行高度，随字数增加或换行自动平滑伸长，保持版面整洁的同时拒绝视觉压迫感。',
-            '[优化] 引入系统级数据防丢机制：当存在未保存的评价草稿或细则修改时，意外刷新网页或关闭浏览器标签页将触发原生二次确认弹窗，彻底杜绝手滑导致的辛劳白费。',
-            '[优化] 搜索功能大幅进化：全面支持“多关键词并发搜索”。输入多个关键词并以空格分隔（如“柚子 剧本 9分”），系统将执行「全部匹配」逻辑进行深度筛选。',
-            '[优化] 强化时间管理机制：编辑现有记录时，系统将自动将该条目的时间戳更新为“当前最新时间”，使其在主页列表中自动置顶。',
-            '[优化] 卡片交互升级：支持光标悬浮在时间上时，以优雅的 Tooltip 形式同时展示“创建”与“修改”的具体时刻。',
-            '[优化] 重构「一票机制」原因选择控件的视觉动效：下拉框默认铺满全宽，选择自定义原因时输入框将带有阻尼感地向下优雅展开多行文本域，选择预设时平滑向上收缩，整体排版更加大气高级。',
-            '[优化] 优化评分细则的编辑体验：移除删除“大类”时的二次确认弹窗。得益于完善的缓冲区与手动保存机制，现在的重构操作更加畅快无阻。',
-            '[优化] 重构 Toast 提示框引擎：引入智能堆叠与生命周期重置机制。短时间内高频触发相同提示（如狂点保存）时将不再发生瀑布流刷屏，而是优雅地在原有气泡右上角弹出“红点计数徽章”，并伴随轻微的心跳动画反馈。细节体验拉满！',
-            '[优化] 优雅解决小屏幕/窗口缩放时导航栏拥挤问题：重构顶部导航栏布局，为其注入「水平滑动引擎」。现已全面支持鼠标滚轮横向滚动、鼠标按住拖拽平移，且点击任意分类时自动居中对齐，提前为移动端/触控屏适配打下完美基础。',
-            '[修复] 彻底移除冗余的旧版逻辑函数，解决增删维度、子项及排序功能失效的严重 Bug。',
-            '[修复] 修正设置面板中变量名拼写错误，并清理了重复的初始化函数。',
-            '[修复] 修正“恢复此分类默认细则”按钮的高危逻辑，现在仅精准重置当前选定的二级分类（如仅重置 动画 或 Galgame 细则），不再误伤全局自定义配置。',
-            '[修复] 解决「一票机制」逻辑割裂 Bug：滑块滑动后根据赞成/否决动态拆分提示标签与预设选项。选中预设词条时自动隐藏输入框，切换至自定义时自动清空文本，回显数据时无缝匹配。修正修改旧评价记录时，一票机制预设选项被意外覆盖清空的逻辑冲突。',
-            '[修复] 修正 Z-Index 样式层级溢出导致的小 Bug：提升全局 Toast 提示框（如“保存成功”）的最高显示层级，彻底解决其偶尔被防呆模糊遮罩层遮挡的问题。',
-            '[修复] 修正修改旧评价记录时，长篇评语输入框无法自动撑开的渲染时机 Bug。现在回显长文本时输入框将优雅地自动伸展至合适高度。',
-            '[修复] 引入「作品名唯一性校验」机制：保存时将自动检索库内重名记录。若检测到重名冲突，系统将拦截保存并弹出预警，彻底杜绝冗余重复数据的产生。'
+            '[✨里程碑] 磅礴上线「个人数据洞察看板」：内置 Chart.js 双引擎渲染，支持实时呈现【领域涉猎饼图】、【全站评分正态分布曲线】等核心参数。',
+            '[新特性] 生态闭环：系统设置新增「导入/导出 JSON 存档」功能。一键无损还原全量打分数据、专属分类框架与界面偏好。',
+            '[新特性] 独创「沉浸式全屏写作 (Zen Mode)」：在评语栏点击开启全屏打字机模式。左侧智能停靠“上下文面板”，右侧提供无干扰广阔写作区。',
+            '[新特性] 引入“时空双轴”管理系统：评价记录现已区分「创建时间」与「修改时间」。',
+            '[优化] 交互大升级：引入自主研发的原生 HTML5 拖拽引擎，全面支持丝滑的拖拽重排。'
         ]
     },
     {
@@ -54,66 +33,20 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         changes: [
             '[新特性] 引入“灵动预览”机制：首页卡片悬浮 0.5s 即可自动查看多维小分细则。',
             '[新特性] 评分面板大类显分：修改评价时，各核心大类标题旁实时显示当前的平均得分。',
-            '[优化] 评分细则管理：支持大类/小项的自由增删及实时排序调整。',
-            '[优化] 状态标签管理：支持自定义状态的显示顺序调整。',
-            '[优化] 规范化更新日志格式，引入 [新特性] [优化] [修复] 等语义化标签。',
-            '[修复] 解决评分细则管理中“恢复默认”按钮失效的问题。',
-            '[修复] 修正管理面板逻辑漏洞：现在增删维度与排序操作均需点击保存方可持久化，防止意外修改。',
-        ]
-    },
-    {
-        version: '1.1.5',
-        changes: [
-            '版权声明：在『关于本项目』中正式添加了作者信息及联系邮箱。'
-        ]
-    },
-    {
-        version: '1.1.4',
-        changes: [
-            '功能增强：高危操作区新增“重置作品状态”功能，并重新梳理了重置项的梯度顺序。',
-            'UI 优化：改进自定义状态添加按钮的布局，解决窄屏下换行的问题，使用更简洁的 + 号图标。'
-        ]
-    },
-    {
-        version: '1.1.3',
-        changes: [
-            '交互革新：一票机制触发时，保留并划掉原始算分，并允许用户自定义极端状态的修正分数（不再死板锁定为 0 或 10）。'
-        ]
-    },
-    {
-        version: '1.1.2',
-        changes: [
-            '细节打磨：导出文件的命名也精确到了秒。'
-        ]
-    },
-    {
-        version: '1.1.1',
-        changes: [
-            '细节打磨：解封底层时间戳，UI外显与导出的入库时间全面精确到秒。'
         ]
     },
     {
         version: '1.1.0',
         changes: [
             '重构一票机制，引入左右滑块交互，强制要求填写判定原因。',
-            '新增首页全局搜索，支持作品名、评语及状态标签的多维检索。',
-            '支持保存“待完善”状态（缺分数/无评语检测）。',
-            '新增「关于本项目」页面及版本控制系统。',
-            '支持导出纯文本 TXT 格式，采用时间戳动态命名。'
-        ]
-    },
-    {
-        version: '1.0.0',
-        changes: [
-            '初创版本，建立十余种分类与雷达图加权算分核心引擎。'
+            '新增首页全局搜索，支持作品名、评语及状态标签的多维检索。'
         ]
     }
 ];
 
-// 自动提取数组第一个作为当前最新版本号，再也不用手动改了！
 const APP_VERSION = APP_CHANGELOG[0].version;
 
-// ================= 核心数据字典 (彻底清空旧缓存，升级至 v2) =================
+// ================= 核心数据字典 =================
 const categoryTree = {
     'all': { name: '全部记录', subs: {} },
     'acg': { name: '二次元 / ACG', subs: { 'anime': '番剧 / 动画', 'vn': 'Galgame', 'game': '游戏', 'manga': '漫画 / 轻小说', 'acg_music': 'ACG 音乐' } },
@@ -235,15 +168,19 @@ let currentSearchQuery = '';
 let currentTagFilter = 'all';
 let schemaBuffer = null; 
 
-// 🌟 核心革新：云端全局数据缓存与同步引擎
+// 🌟 核心革新：云端全局数据缓存与心跳同步引擎
 window.cloudRecords = [];
-window.syncFromCloud = async () => {
+window.syncFromCloud = async (isStartup = false) => {
     const { data, error } = await supabaseClient.from('records').select('*');
     if (error) {
         console.error("数据同步失败:", error);
-        showToast("⚠️ 无法连接到云端数据库，请检查网络");
+        showToast("❌ 无法连接到云端数据库，请检查网络");
     } else {
         window.cloudRecords = data || [];
+        if (isStartup) {
+            const timeStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            showToast(`☁️ 云端数据同步完成 (${timeStr})`);
+        }
     }
 };
 
@@ -352,6 +289,7 @@ function showToast(msg) {
     }, 2500);
 }
 
+// 🌟 核心革新：支持异步等待的防抖确认弹窗
 function showConfirm(title, message, onConfirmCallback, type = 'danger') {
     const overlay = document.getElementById('confirmOverlay'); 
     const okBtn = document.getElementById('confirmOkBtn');
@@ -371,6 +309,29 @@ function showConfirm(title, message, onConfirmCallback, type = 'danger') {
         overlay.classList.remove('active'); 
     };
 
+    // 将执行逻辑抽离，支持 Async Await 锁定
+    const executeAction = async () => {
+        if (!okBtn.disabled) { 
+            okBtn.disabled = true;
+            okBtn.style.opacity = '0.5';
+            okBtn.style.cursor = 'wait';
+            const originalText = okBtn.textContent;
+            okBtn.textContent = '⏳ 处理中...';
+            try {
+                await onConfirmCallback(); 
+            } catch(e) {
+                console.error(e);
+            } finally {
+                closeBox(); 
+                // 恢复原状，为下次打开做准备
+                okBtn.disabled = false;
+                okBtn.style.opacity = '1';
+                okBtn.style.cursor = 'pointer';
+                okBtn.textContent = '确定';
+            }
+        } 
+    };
+
     if (delayTime > 0) {
         okBtn.disabled = true;
         okBtn.style.opacity = '0.5';
@@ -387,6 +348,7 @@ function showConfirm(title, message, onConfirmCallback, type = 'danger') {
                 okBtn.style.opacity = '1';
                 okBtn.style.cursor = 'pointer';
                 okBtn.textContent = `确定`;
+                okBtn.onclick = executeAction;
             }
         }, 1000);
     } else {
@@ -394,10 +356,10 @@ function showConfirm(title, message, onConfirmCallback, type = 'danger') {
         okBtn.style.opacity = '1';
         okBtn.style.cursor = 'pointer';
         okBtn.textContent = `确定`;
+        okBtn.onclick = executeAction;
     }
 
     cancelBtn.onclick = closeBox;
-    okBtn.onclick = () => { if (!okBtn.disabled) { closeBox(); onConfirmCallback(); } };
 }
 
 function debounce(func, wait) {
@@ -436,7 +398,7 @@ function renderChangelog() {
                 const tag = match[1];
                 const text = match[2];
                 let tagStyle = '';
-                if (tag.includes('新特性')) tagStyle = 'background: rgba(52, 152, 219, 0.1); color: var(--link-color); border: 1px solid rgba(52, 152, 219, 0.3);';
+                if (tag.includes('新特性') || tag.includes('里程碑')) tagStyle = 'background: rgba(52, 152, 219, 0.1); color: var(--link-color); border: 1px solid rgba(52, 152, 219, 0.3);';
                 else if (tag.includes('优化')) tagStyle = 'background: rgba(241, 196, 15, 0.15); color: #d68910; border: 1px solid rgba(241, 196, 15, 0.4);';
                 else if (tag.includes('修复')) tagStyle = 'background: rgba(231, 76, 60, 0.1); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3);';
                 else tagStyle = 'background: var(--border-color); color: var(--text-muted); border: 1px solid transparent;';
@@ -472,7 +434,7 @@ function initHoverPreview() {
         if (!card) return;
 
         const id = card.getAttribute('data-id'); 
-        const records = window.cloudRecords; // ☁️ 改用云端数据
+        const records = window.cloudRecords; 
         const rec = records.find(r => r.id === id);
         if (!rec) return;
 
@@ -590,7 +552,7 @@ els.sortSelect.onchange = (e) => { currentSort = e.target.value; renderMainList(
 els.displayModeSelect.onchange = (e) => { localStorage.setItem('displayModePref_v2', e.target.value); renderMainList(); }
 
 function renderMainList() {
-    let records = [...window.cloudRecords]; // ☁️ 改用云端数据
+    let records = [...window.cloudRecords]; 
 
     els.grid.innerHTML = '';
 
@@ -836,7 +798,7 @@ els.workName.addEventListener('input', debounce(function() {
     const hintEl = document.getElementById('duplicateHint');
     if (!name) { hintEl.innerHTML = ''; return; }
 
-    const records = window.cloudRecords; // ☁️ 改用云端数据
+    const records = window.cloudRecords; 
     const dup = records.find(r => r.name.toLowerCase() === name && r.id !== currentEditingId);
     if (dup) hintEl.innerHTML = `⚠️ 馆内已有此记录：<a href="javascript:void(0)" onclick="jumpToRecord('${dup.id}')" style="color:var(--link-color); text-decoration:underline;">立即前往编辑原记录</a>`;
     else hintEl.innerHTML = '';
@@ -920,7 +882,7 @@ window.moveVoteReason = (type, idx, dir) => {
     localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons)); renderVoteReasonsManager();
 };
 window.resetVoteReasons = () => {
-    showConfirm('重置词条确认', '清空所有自定义一票判定词条并恢复默认。确定吗？', () => {
+    showConfirm('重置词条确认', '清空所有自定义一票判定词条并恢复默认。确定吗？', async () => {
         customVoteReasons = JSON.parse(JSON.stringify(defaultVoteReasons)); localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
         renderVoteReasonsManager(); showToast('词条已恢复默认');
     });
@@ -931,7 +893,7 @@ function openModal(id = null) {
     renderStatusDropdown(); isRecordDirty = false;
 
     if (id) { 
-        const records = window.cloudRecords; // ☁️ 改用云端数据
+        const records = window.cloudRecords; 
         const rec = records.find(r => r.id === id);
         document.getElementById('modalTitle').textContent = '修改评价记录';
 
@@ -1010,20 +972,23 @@ function renderZenSidebar() {
 }
 
 function closeModal() { 
-    if(isRecordDirty) showConfirm('未保存警告', '你有尚未保存的修改，直接关闭将丢失这些修改。确定要放弃吗？', () => { els.modal.classList.remove('active'); document.body.style.overflow = ''; isRecordDirty = false; }, 'warning');
+    if(isRecordDirty) showConfirm('未保存警告', '你有尚未保存的修改，直接关闭将丢失这些修改。确定要放弃吗？', async () => { els.modal.classList.remove('active'); document.body.style.overflow = ''; isRecordDirty = false; }, 'warning');
     else { els.modal.classList.remove('active'); document.body.style.overflow = ''; }
 }
 document.getElementById('fabAddBtn').onclick = () => openModal(null);
 document.getElementById('closeModalBtn').onclick = closeModal;
 
-// 🚀 核心革新：云端保存逻辑
+// 🚀 核心革新：云端防抖保存逻辑
 document.getElementById('saveRecordBtn').onclick = async () => {
+    const saveBtn = document.getElementById('saveRecordBtn');
+    if (saveBtn.disabled) return; // 防连点锁
+
     const newName = els.workName.value.trim(); 
     if(!newName) return showToast('作品名称不能为空！');
 
-    const records = window.cloudRecords; // ☁️ 改用云端数据
+    const records = window.cloudRecords; 
     const isDuplicate = records.some(r => r.name.toLowerCase() === newName.toLowerCase() && r.id !== currentEditingId);
-    if (isDuplicate) return showConfirm('作品重名警告', `馆内已存在名为《${newName}》的记录。请修改名称或编辑原记录。`, () => {}, 'warning');
+    if (isDuplicate) return showConfirm('作品重名警告', `馆内已存在名为《${newName}》的记录。请修改名称或编辑原记录。`, async () => {}, 'warning');
 
     const voteVal = parseInt(els.voteSlider.value);
     const voteReason = els.voteReasonInput.value.trim();
@@ -1037,40 +1002,54 @@ document.getElementById('saveRecordBtn').onclick = async () => {
     }
 
     const executeSave = async () => {
-        const now = Date.now(); let finalCreatedAt = now; 
-        if (currentEditingId) {
-            const oldRec = records.find(r => r.id === currentEditingId);
-            if (oldRec) finalCreatedAt = oldRec.createdAt || parseInt(oldRec.id) || now;
-        }
+        // UI 防抖锁启动
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '⏳ 正在同步云端...';
+        saveBtn.style.opacity = '0.7';
+        saveBtn.style.cursor = 'wait';
 
-        const rec = {
-            id: currentEditingId || now.toString(), name: newName, mainCat: els.mainCat.value, subCat: els.subCat.value,
-            subCatText: els.subCat.options[els.subCat.selectedIndex].text, status: els.status.value, review: els.review.value,
-            voteStatus: voteVal, voteReason: voteVal !== 0 ? voteReason : '', voteScore: voteVal !== 0 ? parseFloat(els.voteScoreInput.value) : undefined,
-            isScoreIncomplete: isScoreIncomplete, isReviewIncomplete: isReviewIncomplete, scores: { ...activeScores }, 
-            finalScore: els.finalScore.getAttribute('data-score') || els.finalScore.textContent,
-            createdAt: finalCreatedAt, updatedAt: now, date: new Date(now).toLocaleDateString()
-        };
-        
-        // ☁️ 异步推送到 Supabase
-        const { error } = await supabaseClient.from('records').upsert(rec);
-        if (error) {
-            console.error("保存失败", error);
-            return showToast("❌ 保存至云端失败，请检查网络！");
+        try {
+            const now = Date.now(); let finalCreatedAt = now; 
+            if (currentEditingId) {
+                const oldRec = records.find(r => r.id === currentEditingId);
+                if (oldRec) finalCreatedAt = oldRec.createdAt || parseInt(oldRec.id) || now;
+            }
+
+            const rec = {
+                id: currentEditingId || now.toString(), name: newName, mainCat: els.mainCat.value, subCat: els.subCat.value,
+                subCatText: els.subCat.options[els.subCat.selectedIndex].text, status: els.status.value, review: els.review.value,
+                voteStatus: voteVal, voteReason: voteVal !== 0 ? voteReason : '', voteScore: voteVal !== 0 ? parseFloat(els.voteScoreInput.value) : undefined,
+                isScoreIncomplete: isScoreIncomplete, isReviewIncomplete: isReviewIncomplete, scores: { ...activeScores }, 
+                finalScore: els.finalScore.getAttribute('data-score') || els.finalScore.textContent,
+                createdAt: finalCreatedAt, updatedAt: now, date: new Date(now).toLocaleDateString()
+            };
+            
+            // ☁️ 异步推送到 Supabase
+            const { error } = await supabaseClient.from('records').upsert(rec);
+            if (error) {
+                console.error("保存失败", error);
+                return showToast("❌ 保存至云端失败，请检查网络！");
+            }
+            
+            showToast(currentEditingId ? '✅ 修改已同步至云端' : '✅ 新作品已云端入库');
+            await window.syncFromCloud(); // 重新拉取同步本地数组
+            isRecordDirty = false; closeModal(); renderMainList();
+        } finally {
+            // UI 防抖锁解除
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '保存评价入库';
+            saveBtn.style.opacity = '1';
+            saveBtn.style.cursor = 'pointer';
         }
-        
-        showToast(currentEditingId ? '✅ 修改已同步至云端' : '✅ 新作品已云端入库');
-        await window.syncFromCloud(); // 重新拉取同步本地数组
-        isRecordDirty = false; closeModal(); renderMainList();
     };
 
     if (voteVal === 0 && (isScoreIncomplete || isReviewIncomplete)) {
         let msgArr = []; if (isScoreIncomplete) msgArr.push('部分小项未打分'); if (isReviewIncomplete) msgArr.push('未填写深度评语');
-        showConfirm('评价暂未完成', `系统检测到该作品【${msgArr.join('、')}】。\n是否先作为「待完善」记录暂存入库？`, () => { executeSave(); }, 'warning');
-    } else { executeSave(); }
+        showConfirm('评价暂未完成', `系统检测到该作品【${msgArr.join('、')}】。\n是否先作为「待完善」记录暂存入库？`, async () => { await executeSave(); }, 'warning');
+    } else { await executeSave(); }
 };
 
-// 🚀 核心革新：云端删除逻辑
+// 🚀 核心革新：云端防抖删除逻辑
 els.delBtn.onclick = () => {
     showConfirm('删除确认', `确定要将《${els.workName.value}》彻底删除吗？此操作无法撤销。`, async () => {
         const { error } = await supabaseClient.from('records').delete().eq('id', currentEditingId);
@@ -1096,7 +1075,7 @@ document.getElementById('openSettingsBtn').onclick = () => {
 };
 
 function closeSettingsModal() {
-    if(isSchemaDirty) showConfirm('未保存警告', '你修改的评分细则尚未保存，确定要放弃修改吗？', () => { els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; isSchemaDirty = false; }, 'warning');
+    if(isSchemaDirty) showConfirm('未保存警告', '你修改的评分细则尚未保存，确定要放弃修改吗？', async () => { els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; isSchemaDirty = false; }, 'warning');
     else { els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; }
 }
 document.getElementById('closeSettingsBtn').onclick = closeSettingsModal;
@@ -1111,32 +1090,47 @@ document.querySelectorAll('.setting-menu-item').forEach(item => {
 
 els.themeSelect.onchange = (e) => { localStorage.setItem('themePref_v2', e.target.value); applyTheme(e.target.value); };
 els.resetStatusBtn.onclick = () => {
-    showConfirm('重置状态确认', '将清空所有自定义的状态标签，并恢复为系统初始设置（如：已看、进行中等）。确定吗？', () => {
+    showConfirm('重置状态确认', '将清空所有自定义的状态标签，并恢复为系统初始设置（如：已看、进行中等）。确定吗？', async () => {
         localStorage.removeItem('CustomStatuses_v2'); customStatuses = [...defaultStatuses]; 
         renderStatusManager(); showToast('状态标签已恢复默认');
     });
 };
 
 const finalOverlay = document.getElementById('finalConfirmOverlay');
-document.getElementById('factoryResetBtn').onclick = () => { showConfirm('高危操作：清空全部数据', '将清空所有已保存的评价记录！操作极其危险，请谨慎确认。', () => { finalOverlay.classList.add('active'); }, 'danger'); };
+document.getElementById('factoryResetBtn').onclick = () => { showConfirm('高危操作：清空全部数据', '将清空所有已保存的评价记录！操作极其危险，请谨慎确认。', async () => { finalOverlay.classList.add('active'); }, 'danger'); };
 document.getElementById('finalCancelBtn').onclick = () => { finalOverlay.classList.remove('active'); };
 document.getElementById('finalExportJsonBtn').onclick = () => { document.getElementById('exportJsonBtn').click(); showToast('✅ 抢救性备份已下载！'); };
 
-// 🚀 核心革新：云端清库
+// 🚀 核心革新：云端防抖清库
 document.getElementById('finalOkBtn').onclick = async () => {
-    finalOverlay.classList.remove('active');
+    const btn = document.getElementById('finalOkBtn');
+    if (btn.disabled) return;
     
-    // 危险：删除所有记录 (匹配 ID 不为空的数据)
-    const { error } = await supabaseClient.from('records').delete().neq('id', '0');
-    if (error) return showToast('❌ 云端清空失败');
+    btn.disabled = true;
+    const oldText = btn.innerHTML;
+    btn.innerHTML = '⏳ 正在抹除云端数据...';
+    btn.style.opacity = '0.7';
+    btn.style.cursor = 'wait';
 
-    showToast('💥 云端数据已全部清空，迎来新生'); 
-    await window.syncFromCloud();
-    renderMainList();
+    try {
+        finalOverlay.classList.remove('active');
+        // 危险：删除所有记录 (匹配 ID 不为空的数据)
+        const { error } = await supabaseClient.from('records').delete().neq('id', '0');
+        if (error) return showToast('❌ 云端清空失败');
+
+        showToast('💥 云端数据已全部清空，迎来新生'); 
+        await window.syncFromCloud();
+        renderMainList();
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldText;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+    }
 };
 
 document.getElementById('resetSchemaBtn').onclick = () => {
-    showConfirm('重置细则确认', '将清空所有自定义的评分维度，恢复为官方默认状态。确定吗？', () => {
+    showConfirm('重置细则确认', '将清空所有自定义的评分维度，恢复为官方默认状态。确定吗？', async () => {
         localStorage.removeItem('CustomSchemas_v2'); activeSchemas = JSON.parse(JSON.stringify(defaultSchemas_v2));
         if (schemaBuffer) schemaBuffer = JSON.parse(JSON.stringify(defaultSchemas_v2));
         isSchemaDirty = false; renderSchemaEditor(); showToast('细则已恢复默认');
@@ -1144,7 +1138,7 @@ document.getElementById('resetSchemaBtn').onclick = () => {
 };
 
 els.editorCatSelect.onchange = () => {
-    if(isSchemaDirty) showConfirm('切换分类提示', '当前分类的修改未保存，切换将丢失修改。确定切换吗？', () => { isSchemaDirty = false; renderSchemaEditor(); }, 'warning');
+    if(isSchemaDirty) showConfirm('切换分类提示', '当前分类的修改未保存，切换将丢失修改。确定切换吗？', async () => { isSchemaDirty = false; renderSchemaEditor(); }, 'warning');
     else renderSchemaEditor();
 };
 
@@ -1172,7 +1166,7 @@ function renderSchemaEditor() {
 
 window.triggerSchemaReset = () => {
     const catKey = els.editorCatSelect.value; const catName = els.editorCatSelect.options[els.editorCatSelect.selectedIndex].text;
-    showConfirm('重置确认', `确定要将【${catName}】的评分细则恢复为官方默认吗？此操作将立即覆盖并保存。`, () => {
+    showConfirm('重置确认', `确定要将【${catName}】的评分细则恢复为官方默认吗？此操作将立即覆盖并保存。`, async () => {
         activeSchemas[catKey] = JSON.parse(JSON.stringify(defaultSchemas_v2[catKey]));
         schemaBuffer[catKey] = JSON.parse(JSON.stringify(defaultSchemas_v2[catKey])); 
         localStorage.setItem('CustomSchemas_v2', JSON.stringify(activeSchemas));
@@ -1302,7 +1296,7 @@ function getExportFilename(ext) {
 }
 
 function generateExportData() {
-    const records = window.cloudRecords; // ☁️ 改用云端数据
+    const records = window.cloudRecords; 
     if(records.length === 0) { showToast('暂无数据可导出'); return null; }
     return records;
 }
@@ -1346,7 +1340,7 @@ document.getElementById('exportTxtBtn').onclick = () => {
 };
 
 document.getElementById('exportJsonBtn').onclick = () => {
-    const records = window.cloudRecords; // ☁️ 改用云端数据
+    const records = window.cloudRecords; 
     const settings = {
         customSchemas: activeSchemas, customStatuses: customStatuses, customVoteReasons: customVoteReasons, 
         theme: localStorage.getItem('themePref_v2') || 'auto', displayMode: localStorage.getItem('displayModePref_v2') || 'system',
@@ -1358,7 +1352,7 @@ document.getElementById('exportJsonBtn').onclick = () => {
     triggerDownload(dataUrl, getExportFilename('json'));
 };
 
-// 🚀 核心革新：云端导入还原
+// 🚀 核心革新：云端防抖导入还原
 document.getElementById('importJsonFile').addEventListener('change', function(e) {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
@@ -1387,7 +1381,7 @@ document.getElementById('importJsonFile').addEventListener('change', function(e)
 
                 showToast('✅ 云端存档导入成功！正在重载数据...'); e.target.value = ''; 
                 
-                await window.syncFromCloud(); // 重新拉取云端数据
+                await window.syncFromCloud(); 
                 renderMainList(); renderStatusManager(); renderVoteReasonsManager(); 
                 if (els.settingsModal.classList.contains('active')) { schemaBuffer = JSON.parse(JSON.stringify(activeSchemas)); renderSchemaEditor(); }
             }, 'danger'); 
@@ -1453,7 +1447,7 @@ document.getElementById('openDashboardBtn').onclick = () => {
 document.getElementById('closeDashboardBtn').onclick = () => { document.getElementById('dashboardModal').classList.remove('active'); document.body.style.overflow = ''; };
 
 function renderDashboardData() {
-    const records = window.cloudRecords; // ☁️ 改用云端数据
+    const records = window.cloudRecords; 
     
     document.getElementById('dashTotal').textContent = records.length;
     const scoredRecs = records.filter(r => (parseFloat(r.finalScore) > 0 || r.voteStatus !== 0) && !r.isScoreIncomplete);
@@ -1531,8 +1525,8 @@ async function init() {
     const updateDelayPrefs = () => { localStorage.setItem('confirmDelayPrefs_v2', JSON.stringify({ danger: parseInt(document.getElementById('delayDangerInput').value) || 0, warning: parseInt(document.getElementById('delayWarningInput').value) || 0 })); };
     document.getElementById('delayDangerInput').addEventListener('change', updateDelayPrefs); document.getElementById('delayWarningInput').addEventListener('change', updateDelayPrefs);
 
-    // ☁️ 等待云端数据同步完成...
-    await window.syncFromCloud();
+    // ☁️ 等待云端数据同步完成... (传入 true 触发启动问候 Toast)
+    await window.syncFromCloud(true);
     
     initNavTabs(); initCascader(); renderMainList();
     if(!localStorage.getItem('hasSeenTutorial_v2')) setTimeout(openTutorial, 500);
