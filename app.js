@@ -211,7 +211,7 @@ const defaultSchemas_v2 = {
 
 const defaultStatuses = ['已看 / 通关', '二刷 / 多周目中', '进行中', '搁置中', '烂尾弃坑'];
 
-// ================= 全局状态管理 =================
+// ================= 全局状态管理 (云端进化版) =================
 let currentMainFilter = 'all';
 let currentSubFilter = 'all'; 
 let currentSort = 'update_desc';
@@ -219,25 +219,33 @@ let currentEditingId = null;
 let activeScores = {}; 
 let radarChartInstance = null;
 
-// 脏数据防丢标识
 let isRecordDirty = false;
 let isSchemaDirty = false;
 
-// 获取动态设置
 let activeSchemas = JSON.parse(localStorage.getItem('CustomSchemas_v2')) || JSON.parse(JSON.stringify(defaultSchemas_v2));
 let customStatuses = JSON.parse(localStorage.getItem('CustomStatuses_v2')) || [...defaultStatuses];
 
-// ================= 一票判定原因数据字典 =================
 const defaultVoteReasons = {
     approve: ['白月光 / 童年滤镜', '核心诡计太惊艳'],
     veto: ['严重触碰三观底线', '喂屎烂尾 / 涉嫌欺诈']
 };
 let customVoteReasons = JSON.parse(localStorage.getItem('CustomVoteReasons_v2')) || JSON.parse(JSON.stringify(defaultVoteReasons));
 
-// 首页 tags 搜索
 let currentSearchQuery = '';
 let currentTagFilter = 'all';
-let schemaBuffer = null; // 用于存储细则编辑时的临时数据
+let schemaBuffer = null; 
+
+// 🌟 核心革新：云端全局数据缓存与同步引擎
+window.cloudRecords = [];
+window.syncFromCloud = async () => {
+    const { data, error } = await supabaseClient.from('records').select('*');
+    if (error) {
+        console.error("数据同步失败:", error);
+        showToast("⚠️ 无法连接到云端数据库，请检查网络");
+    } else {
+        window.cloudRecords = data || [];
+    }
+};
 
 const els = {
     navTabs: document.getElementById('mainNavTabs'),
@@ -297,8 +305,8 @@ function getDoubanLabel(score, hasScore) {
 
 function renderStars(score) {
     let stars = Math.round(score / 2);
-    if (stars < 1) stars = 1; // 豆瓣保底 1 星
-    if (stars > 5) stars = 5; // 安全限制最高 5 星
+    if (stars < 1) stars = 1; 
+    if (stars > 5) stars = 5; 
     let str = '';
     for(let i=1; i<=5; i++) { str += (i <= stars) ? '★' : '☆'; }
     return str;
@@ -307,16 +315,12 @@ function renderStars(score) {
 // ================= 弹窗组件与主题 =================
 function showToast(msg) {
     const container = document.getElementById('toastContainer');
-    // 1. 查找屏幕上是否已经有一个内容完全相同的存活 Toast
     const existingToasts = Array.from(container.children);
     const duplicate = existingToasts.find(t => t.dataset.msg === msg && t.classList.contains('show'));
 
     if (duplicate) {
-        // 2. 如果存在，不创建新节点，而是更新红点计数
         let count = parseInt(duplicate.dataset.count || 1) + 1;
         duplicate.dataset.count = count;
-        
-        // 寻找或创建红点 badge
         let badge = duplicate.querySelector('.toast-badge');
         if (!badge) {
             badge = document.createElement('div');
@@ -324,13 +328,9 @@ function showToast(msg) {
             duplicate.appendChild(badge);
         }
         badge.textContent = count;
-        
-        // 触发心跳动画 (利用 offsetWidth 强制引发 DOM 重绘以重启 CSS 动画)
         duplicate.classList.remove('pulse');
         void duplicate.offsetWidth; 
         duplicate.classList.add('pulse');
-
-        // 核心机制：清除旧的死亡倒计时，重新续命 2.5 秒！
         clearTimeout(duplicate.hideTimer);
         duplicate.hideTimer = setTimeout(() => {
             duplicate.classList.remove('show');
@@ -339,17 +339,13 @@ function showToast(msg) {
         return;
     }
 
-    // 3. 如果是新的提示，正常创建
     const toast = document.createElement('div'); 
     toast.className = 'toast'; 
     toast.textContent = msg;
-    toast.dataset.msg = msg; // 隐藏属性：记录原始文字，防止和红点的文字混淆
+    toast.dataset.msg = msg; 
     toast.dataset.count = 1;
-    
     container.appendChild(toast);
     setTimeout(() => toast.classList.add('show'), 10);
-    
-    // 隐藏属性：将定时器挂载在 DOM 上，以便随时可以抢救它
     toast.hideTimer = setTimeout(() => { 
         toast.classList.remove('show'); 
         setTimeout(() => toast.remove(), 300); 
@@ -357,22 +353,19 @@ function showToast(msg) {
 }
 
 function showConfirm(title, message, onConfirmCallback, type = 'danger') {
-    const overlay = document.getElementById('confirmOverlay'); // 👈 紧急修复：补上丢失的弹窗 DOM 声明
+    const overlay = document.getElementById('confirmOverlay'); 
     const okBtn = document.getElementById('confirmOkBtn');
     const cancelBtn = document.getElementById('confirmCancelBtn');
     
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
     
-    // 动态读取最新设置
     const prefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}');
     let delayTime = prefs[type] !== undefined ? parseInt(prefs[type]) : 3;
 
     overlay.classList.add('active');
-    
     let timer = null;
     
-    // 关闭弹窗时必须清理定时器，防止内存泄漏或下一次弹窗闪烁
     const closeBox = () => { 
         if (timer) clearInterval(timer);
         overlay.classList.remove('active'); 
@@ -422,7 +415,6 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     if(localStorage.getItem('themePref_v2') === 'auto') applyTheme('auto');
 });
 
-// ================= 自动渲染更新日志 (引入彩色徽章) =================
 function renderChangelog() {
     const container = document.getElementById('changelogContainer');
     if(!container) return;
@@ -430,46 +422,34 @@ function renderChangelog() {
     
     APP_CHANGELOG.forEach((log, index) => {
         const isCurrent = index === 0;
-        // 外框样式
         const wrapperStyle = isCurrent 
             ? `background: var(--score-bg); padding: 16px; border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.03);` 
             : `padding: 16px 12px; border-bottom: 1px dashed var(--border-color);`;
         
-            const titleHtml = isCurrent 
+        const titleHtml = isCurrent 
             ? `<strong style="color: var(--primary); font-size: 16px; letter-spacing: 0.5px;">v${log.version}</strong> <span style="font-size:12px; color:var(--text-muted); font-weight: bold; margin-left: 6px;">(${log.date || '未知日期'})</span>`
             : `<strong style="color: var(--text-main); font-size: 15px;">v${log.version}</strong> <span style="font-size:11px; color:var(--text-muted); margin-left: 8px;">${log.date || ''}</span>`;
             
         const lis = log.changes.map(c => {
-            // 利用正则提取中括号里的文字，比如 [新特性]:root
             const match = c.match(/^\[(.*?)\]\s*(.*)/);
             if (match) {
                 const tag = match[1];
                 const text = match[2];
-                
-                // 根据不同标签赋予不同颜色方案
                 let tagStyle = '';
-                if (tag.includes('新特性')) {
-                    tagStyle = 'background: rgba(52, 152, 219, 0.1); color: var(--link-color); border: 1px solid rgba(52, 152, 219, 0.3);';
-                } else if (tag.includes('优化')) {
-                    tagStyle = 'background: rgba(241, 196, 15, 0.15); color: #d68910; border: 1px solid rgba(241, 196, 15, 0.4);';
-                } else if (tag.includes('修复')) {
-                    tagStyle = 'background: rgba(231, 76, 60, 0.1); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3);';
-                } else {
-                    tagStyle = 'background: var(--border-color); color: var(--text-muted); border: 1px solid transparent;';
-                }
+                if (tag.includes('新特性')) tagStyle = 'background: rgba(52, 152, 219, 0.1); color: var(--link-color); border: 1px solid rgba(52, 152, 219, 0.3);';
+                else if (tag.includes('优化')) tagStyle = 'background: rgba(241, 196, 15, 0.15); color: #d68910; border: 1px solid rgba(241, 196, 15, 0.4);';
+                else if (tag.includes('修复')) tagStyle = 'background: rgba(231, 76, 60, 0.1); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3);';
+                else tagStyle = 'background: var(--border-color); color: var(--text-muted); border: 1px solid transparent;';
                 
-                // 使用 flex 布局让标签和文字完美对齐，取代传统的原点列表
                 return `
                     <li style="margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px;">
                         <span style="font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; white-space: nowrap; line-height: 1.2; ${tagStyle}; flex-shrink: 0; margin-top: 2px;">${tag}</span>
                         <span style="line-height: 1.5; color: var(--text-main);">${text}</span>
                     </li>`;
             }
-            // 没有标签的旧日志，使用默认原点
             return `<li style="margin-bottom: 8px; margin-left: 18px; list-style-type: disc; line-height: 1.5; color: var(--text-main);">${c}</li>`;
         }).join('');
         
-        // 注意这里去掉了 ul 的默认 padding 和 list-style，因为我们用 flex 接管了排版
         const html = `
             <div style="${wrapperStyle}">
                 ${titleHtml}
@@ -487,20 +467,16 @@ let hoverTimer = null;
 const previewEl = document.getElementById('hoverPreview');
 
 function initHoverPreview() {
-    // 采用事件委托，监听所有的 record-card
     document.getElementById('recordGrid').addEventListener('mouseover', (e) => {
         const card = e.target.closest('.record-card');
         if (!card) return;
 
-        const id = card.getAttribute('data-id'); // 我们等会要在渲染卡片时加上这个属性
-        const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+        const id = card.getAttribute('data-id'); 
+        const records = window.cloudRecords; // ☁️ 改用云端数据
         const rec = records.find(r => r.id === id);
         if (!rec) return;
 
-        // 开启 0.5秒 计时器
-        hoverTimer = setTimeout(() => {
-            showPreview(rec, card);
-        }, 500);
+        hoverTimer = setTimeout(() => { showPreview(rec, card); }, 500);
     });
 
     document.getElementById('recordGrid').addEventListener('mouseout', () => {
@@ -532,64 +508,15 @@ function showPreview(rec, card) {
     });
 
     previewEl.innerHTML = html;
-
-    // 计算位置：出现在卡片旁边
     const rect = card.getBoundingClientRect();
     let left = rect.right + 15;
     let top = rect.top;
 
-    // 边界检查：如果右边放不下，就放左边
-    if (left + 280 > window.innerWidth) {
-        left = rect.left - 275;
-    }
+    if (left + 280 > window.innerWidth) left = rect.left - 275;
     
     previewEl.style.left = `${left}px`;
     previewEl.style.top = `${top}px`;
     previewEl.classList.add('active');
-}
-
-// ================= 初始化 =================
-function init() {
-    const savedTheme = localStorage.getItem('themePref_v2') || 'auto';
-    els.themeSelect.value = savedTheme; applyTheme(savedTheme);
-    
-    // 读取呈现模式
-    const savedDisplayMode = localStorage.getItem('displayModePref_v2') || 'system';
-    els.displayModeSelect.value = savedDisplayMode;
-
-    // 👇 新增：初始化时间显示偏好
-    const savedTimePref = localStorage.getItem('timeDisplayPref_v2') || 'updated';
-    document.getElementById('timeDisplayModeSelect').value = savedTimePref;
-    document.getElementById('timeDisplayModeSelect').onchange = (e) => {
-        localStorage.setItem('timeDisplayPref_v2', e.target.value);
-        renderMainList();
-    };
-
-    // 初始化版本号显示
-    document.querySelectorAll('.versionText').forEach(el => el.textContent = APP_VERSION);
-
-    // 调用刚才写的自动渲染函数
-    renderChangelog();
-    
-    // 初始化弹窗延迟设置
-    const delayPrefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}');
-    document.getElementById('delayDangerInput').value = delayPrefs.danger;
-    document.getElementById('delayWarningInput').value = delayPrefs.warning;
-
-    const updateDelayPrefs = () => {
-        localStorage.setItem('confirmDelayPrefs_v2', JSON.stringify({
-            danger: parseInt(document.getElementById('delayDangerInput').value) || 0,
-            warning: parseInt(document.getElementById('delayWarningInput').value) || 0
-        }));
-    };
-    document.getElementById('delayDangerInput').addEventListener('change', updateDelayPrefs);
-    document.getElementById('delayWarningInput').addEventListener('change', updateDelayPrefs);
-
-    initNavTabs(); initCascader(); renderMainList();
-    
-    if(!localStorage.getItem('hasSeenTutorial_v2')) setTimeout(openTutorial, 500);
-
-    initHoverPreview();
 }
 
 // ================= 导航与瀑布流 =================
@@ -599,66 +526,40 @@ function initNavTabs() {
         tab.className = `nav-tab ${key === 'all' ? 'active' : ''}`;
         tab.textContent = categoryTree[key].name;
         tab.onclick = () => {
-            // 🛡️ 防误触锁：如果是正在拖拽滑动中松开鼠标，则阻止触发点击切换
             if (window.isDraggingNavTabs) return; 
-
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            
-            // 🚀 极致优雅：点击时自动将该标签平滑滚动至屏幕视野中央
             tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 
             currentMainFilter = key; currentSubFilter = 'all'; 
-            els.searchInput.value = '';
-            currentSearchQuery = '';
-            els.tagFilterSelect.value = 'all';
-            currentTagFilter = 'all';
-            
+            els.searchInput.value = ''; currentSearchQuery = '';
+            els.tagFilterSelect.value = 'all'; currentTagFilter = 'all';
             renderSubFilters(); renderMainList();
         };
         els.navTabs.appendChild(tab);
     });
 
-    // 👇 注入：导航栏横向滑动引擎 (完美兼容桌面鼠标与移动端手势)
     const navContainer = els.navTabs;
-    
-    // 1. 拦截鼠标滚轮：将上下滚动无缝转化为左右滑动
     navContainer.addEventListener('wheel', (e) => {
-        if (e.deltaY !== 0) {
-            e.preventDefault();
-            navContainer.scrollBy({ left: e.deltaY * 2, behavior: 'auto' });
-        }
+        if (e.deltaY !== 0) { e.preventDefault(); navContainer.scrollBy({ left: e.deltaY * 2, behavior: 'auto' }); }
     }, { passive: false });
 
-    // 2. 鼠标按住拖拽滑动 (原生 App 体验)
-    let isDown = false;
-    let startX, scrollLeft;
-    window.isDraggingNavTabs = false; 
-
+    let isDown = false; let startX, scrollLeft; window.isDraggingNavTabs = false; 
     navContainer.addEventListener('mousedown', (e) => {
-        isDown = true;
-        window.isDraggingNavTabs = false;
-        navContainer.style.cursor = 'grabbing';
-        navContainer.style.userSelect = 'none'; // 防止拖拽时选中文字变蓝
-        startX = e.pageX - navContainer.offsetLeft;
-        scrollLeft = navContainer.scrollLeft;
+        isDown = true; window.isDraggingNavTabs = false;
+        navContainer.style.cursor = 'grabbing'; navContainer.style.userSelect = 'none'; 
+        startX = e.pageX - navContainer.offsetLeft; scrollLeft = navContainer.scrollLeft;
     });
-
     navContainer.addEventListener('mouseleave', () => { isDown = false; navContainer.style.cursor = ''; });
-
     navContainer.addEventListener('mouseup', () => {
-        isDown = false;
-        navContainer.style.cursor = '';
-        // 延迟 50ms 释放锁，防止拖拽结束瞬间触发 tab.onclick
+        isDown = false; navContainer.style.cursor = '';
         setTimeout(() => window.isDraggingNavTabs = false, 50);
     });
-
     navContainer.addEventListener('mousemove', (e) => {
         if (!isDown) return;
         e.preventDefault();
         const x = e.pageX - navContainer.offsetLeft;
-        const walk = (x - startX) * 1.5; // 滑动灵敏度倍率
-        // 滑动距离大于 10px 才判定为拖拽，避免轻微手抖导致无法点击
+        const walk = (x - startX) * 1.5; 
         if (Math.abs(walk) > 10) window.isDraggingNavTabs = true; 
         navContainer.scrollLeft = scrollLeft - walk;
     });
@@ -683,49 +584,32 @@ function renderSubFilters() {
     });
 }
 
-els.searchInput.addEventListener('input', (e) => { 
-    currentSearchQuery = e.target.value.trim().toLowerCase(); 
-    renderMainList(); 
-});
-els.tagFilterSelect.addEventListener('change', (e) => { 
-    currentTagFilter = e.target.value; 
-    renderMainList(); 
-});
-
+els.searchInput.addEventListener('input', (e) => { currentSearchQuery = e.target.value.trim().toLowerCase(); renderMainList(); });
+els.tagFilterSelect.addEventListener('change', (e) => { currentTagFilter = e.target.value; renderMainList(); });
 els.sortSelect.onchange = (e) => { currentSort = e.target.value; renderMainList(); }
-els.displayModeSelect.onchange = (e) => { 
-    localStorage.setItem('displayModePref_v2', e.target.value); 
-    renderMainList(); 
-}
+els.displayModeSelect.onchange = (e) => { localStorage.setItem('displayModePref_v2', e.target.value); renderMainList(); }
 
 function renderMainList() {
-    let records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    let records = [...window.cloudRecords]; // ☁️ 改用云端数据
+
     els.grid.innerHTML = '';
 
     if (currentMainFilter !== 'all') records = records.filter(r => r.mainCat === currentMainFilter);
     if (currentSubFilter !== 'all') records = records.filter(r => r.subCat === currentSubFilter);
-
-    // 新增：1. 状态标签过滤
     if (currentTagFilter === 'incomplete_score') records = records.filter(r => r.isScoreIncomplete);
     if (currentTagFilter === 'incomplete_review') records = records.filter(r => r.isReviewIncomplete);
 
-    // 升级：2. 全文智能多词检索 (支持空格分隔，全部匹配逻辑)
     if (currentSearchQuery) {
-        // 将搜索词按空格拆分，过滤掉多余空格，得到关键词数组
         const keywords = currentSearchQuery.split(/\s+/).filter(k => k.length > 0);
-        
         records = records.filter(r => {
             const name = (r.name || '').toLowerCase();
             const review = (r.review || '').toLowerCase();
-            
-            // 构造标签池
             let virtualTags = [r.status, r.subCatText];
             if (r.isScoreIncomplete) virtualTags.push('缺分数');
             if (r.isReviewIncomplete) virtualTags.push('无评语');
             if (r.voteStatus === 1) virtualTags.push('一票赞成', '白月光');
             if (r.voteStatus === -1) virtualTags.push('一票否决', '踩雷');
 
-            // 核心逻辑：只有当【每一个】关键词都能在作品名、评语或标签中找到匹配时，才保留记录
             return keywords.every(kw => {
                 const matchName = name.includes(kw);
                 const matchReview = review.includes(kw);
@@ -739,7 +623,6 @@ function renderMainList() {
         const scoreA = parseFloat(a.finalScore);
         const scoreB = parseFloat(b.finalScore);
         switch(currentSort) {
-            // 👇 修改：应用新的四个时间排序维度
             case 'update_desc': return (b.updatedAt || b.createdAt || parseInt(b.id)) - (a.updatedAt || a.createdAt || parseInt(a.id));
             case 'update_asc': return (a.updatedAt || a.createdAt || parseInt(a.id)) - (b.updatedAt || b.createdAt || parseInt(b.id));
             case 'create_desc': return (b.createdAt || parseInt(b.id)) - (a.createdAt || parseInt(a.id));
@@ -758,7 +641,7 @@ function renderMainList() {
     }
 
     const displayMode = els.displayModeSelect.value;
-    const timeDisplayMode = localStorage.getItem('timeDisplayPref_v2') || 'updated'; // 👈 新增：读取偏好
+    const timeDisplayMode = localStorage.getItem('timeDisplayPref_v2') || 'updated'; 
 
     records.forEach(rec => {
         const card = document.createElement('div');
@@ -774,8 +657,7 @@ function renderMainList() {
         if (rec.isScoreIncomplete) incompleteTags += `<span class="tag-incomplete">缺分数</span>`;
         if (rec.isReviewIncomplete) incompleteTags += `<span class="tag-incomplete">无评语</span>`;
         
-        let scoreHtml = '';
-        let scoreTitle = '评分';
+        let scoreHtml = ''; let scoreTitle = '评分';
         const scoreVal = parseFloat(rec.finalScore);
         const hasScore = scoreVal > 0 || rec.isVeto || voteStatus === -1;
 
@@ -793,11 +675,10 @@ function renderMainList() {
             scoreHtml = `<span>${bScore} <span style="font-size: 12px; font-weight: normal; color:var(--text-muted);">${getBangumiLabel(scoreVal, true)}</span></span>`;
         }
 
-        // 👇 新增：智能计算悬浮提示和显示的准确时间
         const tUpdate = rec.updatedAt || rec.createdAt || parseInt(rec.id);
         const tCreate = rec.createdAt || parseInt(rec.id);
         const timeToShow = timeDisplayMode === 'created' ? tCreate : tUpdate;
-        const hoverText = `修改于：${formatPreciseTime({createdAt: tUpdate})}\n创建于：${formatPreciseTime({createdAt: tCreate})}`;
+        const hoverText = `修改于：${formatPreciseTime({createdAt: tUpdate})}\\n创建于：${formatPreciseTime({createdAt: tCreate})}`;
 
         card.innerHTML = `
             ${badgeHtml}
@@ -822,16 +703,12 @@ function renderMainList() {
 // ================= 评分记录弹窗逻辑 =================
 function initCascader() {
     els.mainCat.innerHTML = '';
-    Object.keys(categoryTree).filter(k => k !== 'all').forEach(key => {
-        els.mainCat.add(new Option(categoryTree[key].name, key));
-    });
+    Object.keys(categoryTree).filter(k => k !== 'all').forEach(key => { els.mainCat.add(new Option(categoryTree[key].name, key)); });
     els.mainCat.onchange = () => {
         const subs = categoryTree[els.mainCat.value].subs;
         els.subCat.innerHTML = '';
         Object.keys(subs).forEach(subKey => els.subCat.add(new Option(subs[subKey], subKey)));
-        activeScores = {}; 
-        renderDimensions();
-        isRecordDirty = true;
+        activeScores = {}; renderDimensions(); isRecordDirty = true;
     };
     els.subCat.onchange = () => { activeScores = {}; renderDimensions(); isRecordDirty = true; };
 }
@@ -850,8 +727,7 @@ function generateBlocks(subId, val) {
             <div class="blocks-container" id="blocks_${subId}">${blocks}</div>
             <button class="btn-score-adjust" onclick="adjustScore('${subId}', 1)">+</button>
             <input type="number" class="score-input-num" id="input_${subId}" value="${val}" min="0" max="10" onchange="setScore('${subId}', this.value)">
-        </div>
-    `;
+        </div>`;
 }
 
 function renderDimensions() {
@@ -877,20 +753,16 @@ function renderDimensions() {
                 <div>${subsHTML}</div>
             </div>`);
     });
-    els.dimContainer.querySelectorAll('.score-block').forEach(b => { 
-        b.onclick = function() { setScore(this.dataset.subid, this.dataset.val); } 
-    });
+    els.dimContainer.querySelectorAll('.score-block').forEach(b => { b.onclick = function() { setScore(this.dataset.subid, this.dataset.val); } });
     calculateScore();
 }
 
 window.setScore = function(subId, val) {
     let num = Math.min(10, Math.max(0, parseInt(val) || 0));
-    activeScores[subId] = num;
-    document.getElementById(`input_${subId}`).value = num;
+    activeScores[subId] = num; document.getElementById(`input_${subId}`).value = num;
     const blocks = document.getElementById(`blocks_${subId}`).children;
     for(let i=0; i<10; i++) { if(i < num) blocks[i].classList.add('active'); else blocks[i].classList.remove('active'); }
-    isRecordDirty = true;
-    calculateScore();
+    isRecordDirty = true; calculateScore();
 }
 window.adjustScore = function(id, delta) { setScore(id, activeScores[id] + delta); }
 
@@ -902,30 +774,24 @@ function calculateScore() {
         dim.subs.forEach(s => { sum += activeScores[s.id]; if(activeScores[s.id] > 0) hasAnyScore = true; });
         let avg = sum / dim.subs.length; total += avg * dim.weight;
         radarData.push(avg.toFixed(1)); radarLabels.push(dim.name);
-        // 实时更新大类旁边的分值显示
         const dimScoreEl = document.getElementById(`dimRealScore_${dim.id}`);
         if (dimScoreEl) dimScoreEl.textContent = avg.toFixed(1);
     });
 
     const voteVal = parseInt(els.voteSlider.value);
-    let finalTotal = total; 
-    let displayHtml = '';
+    let finalTotal = total; let displayHtml = '';
 
     if (voteVal !== 0) {
         finalTotal = parseFloat(els.voteScoreInput.value) || 0;
         hasAnyScore = true;
         displayHtml = `<span class="score-strikethrough">${total.toFixed(1)}</span>${finalTotal.toFixed(1)}`;
-    } else {
-        displayHtml = finalTotal.toFixed(1);
-    }
+    } else { displayHtml = finalTotal.toFixed(1); }
 
     els.finalScore.innerHTML = displayHtml;
     els.finalScore.setAttribute('data-score', finalTotal.toFixed(1));
     
     if (!hasAnyScore && finalTotal === 0 && voteVal === 0) {
-        els.finalScore.style.color = '#cbd5e0';
-        els.refDouban.innerHTML = `未评级`;
-        els.refBangumi.innerHTML = `未评级`;
+        els.finalScore.style.color = '#cbd5e0'; els.refDouban.innerHTML = `未评级`; els.refBangumi.innerHTML = `未评级`;
     } else {
         if (voteVal === 1) els.finalScore.style.color = 'var(--warning)';
         else if (voteVal === -1) els.finalScore.style.color = 'var(--danger)';
@@ -933,12 +799,8 @@ function calculateScore() {
         else if(finalTotal >= 6) els.finalScore.style.color = '#f39c12'; 
         else els.finalScore.style.color = '#7f8c8d'; 
 
-        const bLabel = getBangumiLabel(finalTotal, hasAnyScore);
-        const dLabel = getDoubanLabel(finalTotal, hasAnyScore);
-        
-        let bScoreRef = Math.round(finalTotal);
-        if (bScoreRef < 1) bScoreRef = 1; 
-        
+        const bLabel = getBangumiLabel(finalTotal, hasAnyScore); const dLabel = getDoubanLabel(finalTotal, hasAnyScore);
+        let bScoreRef = Math.round(finalTotal); if (bScoreRef < 1) bScoreRef = 1; 
         els.refDouban.innerHTML = `<span style="color: #f39c12; letter-spacing: 2px; font-size: 14px;">${renderStars(finalTotal)}</span> <span style="font-weight:normal;">(${dLabel})</span>`;
         els.refBangumi.innerHTML = `${bScoreRef} 分 <span style="font-weight:normal;">(${bLabel})</span>`;
     }
@@ -954,13 +816,8 @@ function calculateScore() {
         data: { 
             labels: radarLabels, 
             datasets: [{ 
-                // 如果开启了一票机制，雷达图直接拉满或清零；否则显示真实分布
                 data: voteVal !== 0 ? radarLabels.map(()=>finalTotal) : radarData, 
-                backgroundColor: 'rgba(240, 145, 153, 0.25)', 
-                borderColor: '#f09199', 
-                pointBackgroundColor: '#f09199', 
-                borderWidth: 2, 
-                pointRadius: 3 
+                backgroundColor: 'rgba(240, 145, 153, 0.25)', borderColor: '#f09199', pointBackgroundColor: '#f09199', borderWidth: 2, pointRadius: 3 
             }] 
         },
         options: { 
@@ -970,40 +827,24 @@ function calculateScore() {
     });
 }
 
-// 脏数据监听
 ['workName', 'reviewText'].forEach(id => document.getElementById(id).addEventListener('input', () => isRecordDirty = true));
 els.status.addEventListener('change', () => isRecordDirty = true);
 
 // ================= 实时重名检测与跳转引擎 =================
-
-// 1. 监听输入框，实现“秒级”重名提醒
 els.workName.addEventListener('input', debounce(function() {
     const name = this.value.trim().toLowerCase();
     const hintEl = document.getElementById('duplicateHint');
-    
     if (!name) { hintEl.innerHTML = ''; return; }
 
-    const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
-    // 寻找名字相同但 ID 不同的记录
+    const records = window.cloudRecords; // ☁️ 改用云端数据
     const dup = records.find(r => r.name.toLowerCase() === name && r.id !== currentEditingId);
-
-    if (dup) {
-        hintEl.innerHTML = `⚠️ 馆内已有此记录：<a href="javascript:void(0)" onclick="jumpToRecord('${dup.id}')" style="color:var(--link-color); text-decoration:underline;">立即前往编辑原记录</a>`;
-    } else {
-        hintEl.innerHTML = '';
-    }
+    if (dup) hintEl.innerHTML = `⚠️ 馆内已有此记录：<a href="javascript:void(0)" onclick="jumpToRecord('${dup.id}')" style="color:var(--link-color); text-decoration:underline;">立即前往编辑原记录</a>`;
+    else hintEl.innerHTML = '';
 }, 300));
 
-// 2. 实现“传送门”跳转函数
 window.jumpToRecord = (id) => {
-    // 因为用户是发现重名后主动“切换”，所以强制关闭脏检查提示
-    isRecordDirty = false; 
-    document.getElementById('editModal').classList.remove('active');
-    document.body.style.overflow = '';
-    
-    // 微调延迟后重新打开新 ID 的弹窗
-    setTimeout(() => openModal(id), 150);
-    showToast('已跳转至原有记录');
+    isRecordDirty = false; document.getElementById('editModal').classList.remove('active'); document.body.style.overflow = '';
+    setTimeout(() => openModal(id), 150); showToast('已跳转至原有记录');
 };
 
 // ================= 一票机制动态 UI 与管理引擎 =================
@@ -1014,83 +855,51 @@ function updateVoteUI(isProgrammatic = false) {
     
     if (val !== 0) {
         const label = document.getElementById('voteReasonLabel');
-        const select = els.voteReasonSelect;
-        const type = val === 1 ? 'approve' : 'veto';
-
-        // 1. 动态分离提示文本
+        const select = els.voteReasonSelect; const type = val === 1 ? 'approve' : 'veto';
         label.textContent = val === 1 ? '一票赞成的原因 (必填)：' : '一票否决的原因 (必填)：';
-
-        // 2. 动态分离下拉框内容
         select.innerHTML = '<option value="">自定义原因...</option>';
         customVoteReasons[type].forEach(reason => select.add(new Option(reason, reason)));
 
         if (!isProgrammatic) {
-            select.value = '';
-            const wrapper = document.getElementById('voteReasonInputWrapper');
-            // 👇 触发向下展开动效 (高度上限放宽，包容多行文本)
-            wrapper.style.maxHeight = '150px';
-            wrapper.style.opacity = '1';
-            wrapper.style.marginTop = '8px';
-            els.voteReasonInput.value = ''; // 清空
+            select.value = ''; const wrapper = document.getElementById('voteReasonInputWrapper');
+            wrapper.style.maxHeight = '150px'; wrapper.style.opacity = '1'; wrapper.style.marginTop = '8px';
+            els.voteReasonInput.value = ''; 
             if (typeof autoResizeTextarea === 'function') autoResizeTextarea(els.voteReasonInput);
-            if (val === -1) els.voteScoreInput.value = 0;
-            else if (val === 1) els.voteScoreInput.value = 10;
+            if (val === -1) els.voteScoreInput.value = 0; else if (val === 1) els.voteScoreInput.value = 10;
         }
     }
-    
     if (val === -1) els.voteScoreInput.style.color = 'var(--danger)';
     else if (val === 1) els.voteScoreInput.style.color = 'var(--warning)';
 }
 
 els.voteSlider.addEventListener('input', (e) => { updateVoteUI(false); isRecordDirty = true; calculateScore(); });
-
-// 3. 上下弹出的优雅隐藏与清空逻辑 (核心动效修复)
 els.voteReasonSelect.addEventListener('change', (e) => {
     const wrapper = document.getElementById('voteReasonInputWrapper');
     if (e.target.value === "") {
-        // 切回自定义：向下弹开编辑框、清空内容
-        wrapper.style.maxHeight = '150px';
-        wrapper.style.opacity = '1';
-        wrapper.style.marginTop = '8px';
-        els.voteReasonInput.style.display = 'block'; // 兜底防止意外隐藏
-        els.voteReasonInput.value = '';
+        wrapper.style.maxHeight = '150px'; wrapper.style.opacity = '1'; wrapper.style.marginTop = '8px';
+        els.voteReasonInput.style.display = 'block'; els.voteReasonInput.value = '';
         if (typeof autoResizeTextarea === 'function') autoResizeTextarea(els.voteReasonInput);
     } else {
-        // 选了预设：触发 CSS 动画，平滑向上收起编辑框、传值给后台
-        wrapper.style.maxHeight = '0';
-        wrapper.style.opacity = '0';
-        wrapper.style.marginTop = '0';
+        wrapper.style.maxHeight = '0'; wrapper.style.opacity = '0'; wrapper.style.marginTop = '0';
         els.voteReasonInput.value = e.target.value;
     }
     isRecordDirty = true;
 });
-
-els.voteReasonInput.addEventListener('input', function() { 
-    isRecordDirty = true; 
-    if (typeof autoResizeTextarea === 'function') autoResizeTextarea(this); 
-});
-
-//修正分数实时同步监听器
+els.voteReasonInput.addEventListener('input', function() { isRecordDirty = true; if (typeof autoResizeTextarea === 'function') autoResizeTextarea(this); });
 els.voteScoreInput.addEventListener('input', () => {
     let val = parseFloat(els.voteScoreInput.value);
     if(val < 0) els.voteScoreInput.value = 0;
     if(val > 10) els.voteScoreInput.value = 10;
-    isRecordDirty = true;
-    calculateScore();
+    isRecordDirty = true; calculateScore();
 });
 
-// 管理列表渲染与操作
 function renderVoteReasonsManager() {
     ['approve', 'veto'].forEach(type => {
-        const listEl = document.getElementById(`${type}ReasonList`);
-        listEl.innerHTML = '';
+        const listEl = document.getElementById(`${type}ReasonList`); listEl.innerHTML = '';
         customVoteReasons[type].forEach((reason, idx) => {
             listEl.insertAdjacentHTML('beforeend', `
                 <div class="status-item draggable-item" draggable="true" ondragstart="handleDragStart(event, 'vote_${type}', ${idx})" ondragover="handleDragOver(event, 'vote_${type}')" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'vote_${type}', ${idx})" ondragend="handleDragEnd(event)">
-                    <div style="display:flex; align-items:center; gap:5px;">
-                        <div class="drag-handle" title="按住拖拽排序">☰</div>
-                        <span>${reason}</span>
-                    </div>
+                    <div style="display:flex; align-items:center; gap:5px;"><div class="drag-handle" title="按住拖拽排序">☰</div><span>${reason}</span></div>
                     <button class="btn-icon-del" onclick="delVoteReason('${type}', ${idx})">✖</button>
                 </div>`);
         });
@@ -1099,370 +908,196 @@ function renderVoteReasonsManager() {
 
 window.addVoteReason = (type) => {
     const input = document.getElementById(type === 'approve' ? 'newApproveReason' : 'newVetoReason');
-    const val = input.value.trim();
-    if(!val) return;
+    const val = input.value.trim(); if(!val) return;
     if(customVoteReasons[type].includes(val)) return showToast('该原因已存在');
-    customVoteReasons[type].push(val);
-    localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+    customVoteReasons[type].push(val); localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
     input.value = ''; renderVoteReasonsManager(); showToast('原因词条已添加');
 };
-
-window.delVoteReason = (type, idx) => {
-    customVoteReasons[type].splice(idx, 1);
-    localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
-    renderVoteReasonsManager();
-};
-
+window.delVoteReason = (type, idx) => { customVoteReasons[type].splice(idx, 1); localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons)); renderVoteReasonsManager(); };
 window.moveVoteReason = (type, idx, dir) => {
     if (idx + dir < 0 || idx + dir >= customVoteReasons[type].length) return;
-    const temp = customVoteReasons[type][idx];
-    customVoteReasons[type][idx] = customVoteReasons[type][idx+dir];
-    customVoteReasons[type][idx+dir] = temp;
-    localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
-    renderVoteReasonsManager();
+    const temp = customVoteReasons[type][idx]; customVoteReasons[type][idx] = customVoteReasons[type][idx+dir]; customVoteReasons[type][idx+dir] = temp;
+    localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons)); renderVoteReasonsManager();
 };
-
 window.resetVoteReasons = () => {
     showConfirm('重置词条确认', '清空所有自定义一票判定词条并恢复默认。确定吗？', () => {
-        customVoteReasons = JSON.parse(JSON.stringify(defaultVoteReasons));
-        localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
+        customVoteReasons = JSON.parse(JSON.stringify(defaultVoteReasons)); localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
         renderVoteReasonsManager(); showToast('词条已恢复默认');
     });
 };
 
 function openModal(id = null) {
-    document.getElementById('duplicateHint').innerHTML = ''; // 👈 重置重名提示
-    currentEditingId = id; els.delBtn.style.display = id ? 'block' : 'none'; 
-    renderStatusDropdown(); 
-    isRecordDirty = false;
+    document.getElementById('duplicateHint').innerHTML = ''; currentEditingId = id; els.delBtn.style.display = id ? 'block' : 'none'; 
+    renderStatusDropdown(); isRecordDirty = false;
 
     if (id) { 
-        const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+        const records = window.cloudRecords; // ☁️ 改用云端数据
         const rec = records.find(r => r.id === id);
-
         document.getElementById('modalTitle').textContent = '修改评价记录';
 
-        // ✅ 回显创建/修改时间（替代 originalTimeDisplay）
         const timeContainer = document.getElementById('timeInfoContainer');
         const createLabel = document.getElementById('createTimeLabel');
         const updateLabel = document.getElementById('updateTimeLabel');
-
         timeContainer.style.display = 'flex';
-
-        // “优雅说法”：formatPreciseTime 只认 createdAt，就喂一个对象进去
         createLabel.textContent = `🌱 创建于：${formatPreciseTime({ createdAt: rec.createdAt || rec.id })}`;
         updateLabel.textContent = `🔄 修改于：${formatPreciseTime({ createdAt: rec.updatedAt || rec.createdAt || rec.id })}`;
 
         els.mainCat.value = rec.mainCat;
-        const subs = categoryTree[rec.mainCat].subs;
-        els.subCat.innerHTML = '';
+        const subs = categoryTree[rec.mainCat].subs; els.subCat.innerHTML = '';
         Object.keys(subs).forEach(subKey => els.subCat.add(new Option(subs[subKey], subKey)));
-        els.subCat.value = rec.subCat;
-        
-        els.workName.value = rec.name; 
+        els.subCat.value = rec.subCat; els.workName.value = rec.name; 
         if(!customStatuses.includes(rec.status)) els.status.add(new Option(rec.status, rec.status));
-        els.status.value = rec.status; 
-        els.review.value = rec.review;
+        els.status.value = rec.status; els.review.value = rec.review;
         
         const voteStat = rec.voteStatus !== undefined ? rec.voteStatus : (rec.isProtect ? 1 : (rec.isVeto ? -1 : 0));
-        els.voteSlider.value = voteStat;
-        updateVoteUI(true); 
+        els.voteSlider.value = voteStat; updateVoteUI(true); 
 
         if (voteStat !== 0) {
             const type = voteStat === 1 ? 'approve' : 'veto';
             const wrapper = document.getElementById('voteReasonInputWrapper');
             if (customVoteReasons[type].includes(rec.voteReason)) {
-                // 如果存的是预设，向上收起输入框
-                els.voteReasonSelect.value = rec.voteReason;
-                wrapper.style.maxHeight = '0';
-                wrapper.style.opacity = '0';
-                wrapper.style.marginTop = '0';
-                els.voteReasonInput.value = rec.voteReason;
+                els.voteReasonSelect.value = rec.voteReason; wrapper.style.maxHeight = '0'; wrapper.style.opacity = '0'; wrapper.style.marginTop = '0'; els.voteReasonInput.value = rec.voteReason;
             } else {
-                // 如果存的是自定义，向下展开输入框
-                els.voteReasonSelect.value = '';
-                wrapper.style.maxHeight = '150px';
-                wrapper.style.opacity = '1';
-                wrapper.style.marginTop = '8px';
-                els.voteReasonInput.value = rec.voteReason || '';
+                els.voteReasonSelect.value = ''; wrapper.style.maxHeight = '150px'; wrapper.style.opacity = '1'; wrapper.style.marginTop = '8px'; els.voteReasonInput.value = rec.voteReason || '';
             }
         }
-
         els.voteScoreInput.value = rec.voteScore !== undefined ? rec.voteScore : (voteStat === 1 ? 10 : (voteStat === -1 ? 0 : ''));
         activeScores = { ...rec.scores }; 
-
     } else {
         document.getElementById('modalTitle').textContent = '新增收视阅读记录';
-
-        // ✅ 新建时隐藏时间容器
         document.getElementById('timeInfoContainer').style.display = 'none';
-
-        els.workName.value = '';
-        els.review.value = '';
-        els.status.selectedIndex = 0;
-        activeScores = {};
-        
-        els.voteSlider.value = 0;
-        els.voteScoreInput.value = '';
-        updateVoteUI(true);
-
+        els.workName.value = ''; els.review.value = ''; els.status.selectedIndex = 0; activeScores = {};
+        els.voteSlider.value = 0; els.voteScoreInput.value = ''; updateVoteUI(true);
         if (currentMainFilter !== 'all') {
-            els.mainCat.value = currentMainFilter;
-            els.mainCat.onchange(); 
+            els.mainCat.value = currentMainFilter; els.mainCat.onchange(); 
             if (currentSubFilter !== 'all') els.subCat.value = currentSubFilter;
-        } else {
-            els.mainCat.selectedIndex = 0;
-            els.mainCat.onchange();
-        }
+        } else { els.mainCat.selectedIndex = 0; els.mainCat.onchange(); }
     }
     renderDimensions(); els.modal.classList.add('active'); document.body.style.overflow = 'hidden';
-    // 延迟 50ms 等待弹窗 CSS 动画渲染完成后，重新计算文本框高度，否则 scrollHeight 可能是错的
     setTimeout(() => {
         isRecordDirty = false;
-        if (typeof autoResizeTextarea === 'function') {
-            autoResizeTextarea(els.review); 
-            autoResizeTextarea(els.voteReasonInput); // 👈 追加这句：一票原因框也要回显撑开
-        }
+        if (typeof autoResizeTextarea === 'function') { autoResizeTextarea(els.review); autoResizeTextarea(els.voteReasonInput); }
     }, 50);
 }
 
-// ================= 文本自动延展逻辑 =================
 const reviewInput = document.getElementById('reviewText');
-const autoResizeTextarea = (el) => {
-    el.style.height = 'auto'; // 先归零
-    el.style.height = (el.scrollHeight) + 'px'; // 根据内容撑开
-};
-reviewInput.addEventListener('input', function() {
-    autoResizeTextarea(this);
-});
+const autoResizeTextarea = (el) => { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; };
+reviewInput.addEventListener('input', function() { autoResizeTextarea(this); });
 
-// ================= 沉浸式全屏写作 (Zen Mode) =================
-const zenOverlay = document.getElementById('zenOverlay');
-const zenReviewText = document.getElementById('zenReviewText');
-const zenSidebar = document.getElementById('zenSidebar');
-
+const zenOverlay = document.getElementById('zenOverlay'); const zenReviewText = document.getElementById('zenReviewText'); const zenSidebar = document.getElementById('zenSidebar');
 document.getElementById('openZenBtn').onclick = () => {
-    // 同步当前文本到全屏
-    zenReviewText.value = reviewInput.value;
-    // 渲染聪明的侧边栏
-    renderZenSidebar();
-    // 展开动画
-    zenOverlay.classList.add('active');
-    // 让光标自动聚焦到文本末尾
-    setTimeout(() => {
-        zenReviewText.focus();
-        zenReviewText.selectionStart = zenReviewText.value.length;
-    }, 100);
+    zenReviewText.value = reviewInput.value; renderZenSidebar(); zenOverlay.classList.add('active');
+    setTimeout(() => { zenReviewText.focus(); zenReviewText.selectionStart = zenReviewText.value.length; }, 100);
 };
+const closeZenMode = () => { reviewInput.value = zenReviewText.value; autoResizeTextarea(reviewInput); isRecordDirty = true; zenOverlay.classList.remove('active'); };
+document.getElementById('closeZenBtn').onclick = closeZenMode; zenReviewText.addEventListener('input', () => { isRecordDirty = true; });
 
-const closeZenMode = () => {
-    // 将全屏写的文字同步回原来的小框
-    reviewInput.value = zenReviewText.value;
-    autoResizeTextarea(reviewInput); // 重新计算小框高度
-    isRecordDirty = true;
-    zenOverlay.classList.remove('active');
-};
-document.getElementById('closeZenBtn').onclick = closeZenMode;
-zenReviewText.addEventListener('input', () => { isRecordDirty = true; });
-
-// 绘制侧边栏上下文
 function renderZenSidebar() {
-    const workName = els.workName.value || '未命名作品';
-    const finalScore = els.finalScore.innerHTML; 
-    const scoreColor = els.finalScore.style.color;
-    const voteVal = parseInt(els.voteSlider.value);
-    
+    const workName = els.workName.value || '未命名作品'; const finalScore = els.finalScore.innerHTML; const scoreColor = els.finalScore.style.color; const voteVal = parseInt(els.voteSlider.value);
     let voteHtml = '';
-    if (voteVal === 1) {
-        const reason = els.voteReasonInput.value || els.voteReasonSelect.value || '无';
-        voteHtml = `<div style="background: var(--warning); color: #000; padding: 12px; border-radius: 8px; font-weight: 900; margin-bottom: 20px; font-size: 13px;">🌟 一票赞成: <br><span style="font-weight:normal; margin-top:4px; display:block;">${reason}</span></div>`;
-    } else if (voteVal === -1) {
-        const reason = els.voteReasonInput.value || els.voteReasonSelect.value || '无';
-        voteHtml = `<div style="background: var(--danger); color: #fff; padding: 12px; border-radius: 8px; font-weight: 900; margin-bottom: 20px; font-size: 13px;">💣 一票否决: <br><span style="font-weight:normal; margin-top:4px; display:block;">${reason}</span></div>`;
-    }
+    if (voteVal === 1) voteHtml = `<div style="background: var(--warning); color: #000; padding: 12px; border-radius: 8px; font-weight: 900; margin-bottom: 20px; font-size: 13px;">🌟 一票赞成: <br><span style="font-weight:normal; margin-top:4px; display:block;">${els.voteReasonInput.value || els.voteReasonSelect.value || '无'}</span></div>`;
+    else if (voteVal === -1) voteHtml = `<div style="background: var(--danger); color: #fff; padding: 12px; border-radius: 8px; font-weight: 900; margin-bottom: 20px; font-size: 13px;">💣 一票否决: <br><span style="font-weight:normal; margin-top:4px; display:block;">${els.voteReasonInput.value || els.voteReasonSelect.value || '无'}</span></div>`;
 
-    const schema = activeSchemas[els.subCat.value];
-    let barsHtml = `<div style="font-size:13px; font-weight:bold; margin-bottom:15px; color:var(--primary); border-bottom:1px solid var(--border-color); padding-bottom:8px;">📊 实时评价细分矩阵</div>`;
+    const schema = activeSchemas[els.subCat.value]; let barsHtml = `<div style="font-size:13px; font-weight:bold; margin-bottom:15px; color:var(--primary); border-bottom:1px solid var(--border-color); padding-bottom:8px;">📊 实时评价细分矩阵</div>`;
     if (schema) {
         schema.forEach(dim => {
-            let sum = 0;
-            dim.subs.forEach(s => sum += (activeScores[s.id] || 0));
-            const avg = sum / dim.subs.length;
-            const percent = (avg * 10).toFixed(0);
-
-            barsHtml += `
-                <div style="margin-bottom: 12px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: var(--text-main);">
-                        <span>${dim.name}</span>
-                        <span style="font-weight: 900;">${avg.toFixed(1)}</span>
-                    </div>
-                    <div style="height: 6px; background: var(--score-bg); border-radius: 3px; overflow: hidden;">
-                        <div style="height: 100%; background: var(--primary); width: ${percent}%; border-radius: 3px;"></div>
-                    </div>
-                </div>`;
+            let sum = 0; dim.subs.forEach(s => sum += (activeScores[s.id] || 0));
+            const avg = sum / dim.subs.length; const percent = (avg * 10).toFixed(0);
+            barsHtml += `<div style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: var(--text-main);"><span>${dim.name}</span><span style="font-weight: 900;">${avg.toFixed(1)}</span></div><div style="height: 6px; background: var(--score-bg); border-radius: 3px; overflow: hidden;"><div style="height: 100%; background: var(--primary); width: ${percent}%; border-radius: 3px;"></div></div></div>`;
         });
     }
-
-    zenSidebar.innerHTML = `
-        <div style="font-size: 13px; color: var(--text-muted); font-weight: bold; margin-bottom: 5px;">正在评价</div>
-        <div style="font-size: 22px; font-weight: 900; color: var(--link-color); margin-bottom: 20px; line-height: 1.3;">${workName}</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">系统演算总分</div>
-        <div style="font-size: 48px; font-weight: 900; line-height: 1; margin-bottom: 25px; color: ${scoreColor}; font-family: 'Arial Black', Impact, sans-serif;">${finalScore}</div>
-        ${voteHtml}
-        ${barsHtml}
-    `;
+    zenSidebar.innerHTML = `<div style="font-size: 13px; color: var(--text-muted); font-weight: bold; margin-bottom: 5px;">正在评价</div><div style="font-size: 22px; font-weight: 900; color: var(--link-color); margin-bottom: 20px; line-height: 1.3;">${workName}</div><div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">系统演算总分</div><div style="font-size: 48px; font-weight: 900; line-height: 1; margin-bottom: 25px; color: ${scoreColor}; font-family: 'Arial Black', Impact, sans-serif;">${finalScore}</div>${voteHtml}${barsHtml}`;
 }
 
 function closeModal() { 
-    if(isRecordDirty) {
-        showConfirm('未保存警告', '你有尚未保存的修改，直接关闭将丢失这些修改。确定要放弃吗？', () => {
-            els.modal.classList.remove('active'); document.body.style.overflow = ''; isRecordDirty = false;
-        },
-        'warning'
-    );
-    } else { els.modal.classList.remove('active'); document.body.style.overflow = ''; }
-    
+    if(isRecordDirty) showConfirm('未保存警告', '你有尚未保存的修改，直接关闭将丢失这些修改。确定要放弃吗？', () => { els.modal.classList.remove('active'); document.body.style.overflow = ''; isRecordDirty = false; }, 'warning');
+    else { els.modal.classList.remove('active'); document.body.style.overflow = ''; }
 }
 document.getElementById('fabAddBtn').onclick = () => openModal(null);
 document.getElementById('closeModalBtn').onclick = closeModal;
 
-document.getElementById('saveRecordBtn').onclick = () => {
-    // 1. 先提取并修剪名称
+// 🚀 核心革新：云端保存逻辑
+document.getElementById('saveRecordBtn').onclick = async () => {
     const newName = els.workName.value.trim(); 
-    
-    // 2. 校验是否为空
     if(!newName) return showToast('作品名称不能为空！');
 
-    // 3. 重名校验引擎
-    let records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
-    
-    // 修复：确保使用刚才定义的 newName 变量
-    const isDuplicate = records.some(r => 
-        r.name.toLowerCase() === newName.toLowerCase() && r.id !== currentEditingId
-    );
-
-    if (isDuplicate) {
-        return showConfirm('作品重名警告', `馆内已存在名为《${newName}》的记录。为了数据唯一性，请修改名称（如加注年份、版本等）或直接编辑原记录。`, () => {
-            // 用户确认后不关闭窗口，留在原地修改
-        }, 'warning');
-    }
+    const records = window.cloudRecords; // ☁️ 改用云端数据
+    const isDuplicate = records.some(r => r.name.toLowerCase() === newName.toLowerCase() && r.id !== currentEditingId);
+    if (isDuplicate) return showConfirm('作品重名警告', `馆内已存在名为《${newName}》的记录。请修改名称或编辑原记录。`, () => {}, 'warning');
 
     const voteVal = parseInt(els.voteSlider.value);
     const voteReason = els.voteReasonInput.value.trim();
-    if (voteVal !== 0 && !voteReason) {
-        return showToast('启用一票机制时，必须填写具体判定原因！');
-    }
+    if (voteVal !== 0 && !voteReason) return showToast('启用一票机制时，必须填写具体判定原因！');
 
-    // 检查评价是否完整
-    let isScoreIncomplete = false;
-    let isReviewIncomplete = false;
+    let isScoreIncomplete = false; let isReviewIncomplete = false;
     if (voteVal === 0) {
         const schema = activeSchemas[els.subCat.value];
-        schema.forEach(dim => dim.subs.forEach(s => {
-            if ((activeScores[s.id] || 0) === 0) isScoreIncomplete = true;
-        }));
+        schema.forEach(dim => dim.subs.forEach(s => { if ((activeScores[s.id] || 0) === 0) isScoreIncomplete = true; }));
         if (!els.review.value.trim()) isReviewIncomplete = true;
     }
 
-    const executeSave = () => {
-        const now = Date.now();
-        let finalCreatedAt = now; // 默认是现在
-        
+    const executeSave = async () => {
+        const now = Date.now(); let finalCreatedAt = now; 
         if (currentEditingId) {
-            const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
             const oldRec = records.find(r => r.id === currentEditingId);
-            // 核心：如果是编辑，保留最初的创建时间；如果旧数据没这个字段，取 ID 为创建时间
-            if (oldRec) {
-                finalCreatedAt = oldRec.createdAt || parseInt(oldRec.id) || now;
-            }
+            if (oldRec) finalCreatedAt = oldRec.createdAt || parseInt(oldRec.id) || now;
         }
 
         const rec = {
-            id: currentEditingId || now.toString(), 
-            name: newName, 
-            mainCat: els.mainCat.value, 
-            subCat: els.subCat.value,
-            subCatText: els.subCat.options[els.subCat.selectedIndex].text, 
-            status: els.status.value, 
-            review: els.review.value,
-            voteStatus: voteVal, 
-            voteReason: voteVal !== 0 ? voteReason : '', 
-            voteScore: voteVal !== 0 ? parseFloat(els.voteScoreInput.value) : undefined,
-            isScoreIncomplete: isScoreIncomplete, 
-            isReviewIncomplete: isReviewIncomplete, 
-            scores: { ...activeScores }, 
+            id: currentEditingId || now.toString(), name: newName, mainCat: els.mainCat.value, subCat: els.subCat.value,
+            subCatText: els.subCat.options[els.subCat.selectedIndex].text, status: els.status.value, review: els.review.value,
+            voteStatus: voteVal, voteReason: voteVal !== 0 ? voteReason : '', voteScore: voteVal !== 0 ? parseFloat(els.voteScoreInput.value) : undefined,
+            isScoreIncomplete: isScoreIncomplete, isReviewIncomplete: isReviewIncomplete, scores: { ...activeScores }, 
             finalScore: els.finalScore.getAttribute('data-score') || els.finalScore.textContent,
-            createdAt: finalCreatedAt, // 永恒坐标
-            updatedAt: now,            // 动态坐标
-            date: new Date(now).toLocaleDateString()
+            createdAt: finalCreatedAt, updatedAt: now, date: new Date(now).toLocaleDateString()
         };
         
-        let records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
-        if (currentEditingId) {
-            const idx = records.findIndex(r => r.id === currentEditingId);
-            records[idx] = rec; 
-            showToast('修改已保存');
-        } else { 
-            records.unshift(rec); 
-            showToast('新作品入库成功'); 
+        // ☁️ 异步推送到 Supabase
+        const { error } = await supabaseClient.from('records').upsert(rec);
+        if (error) {
+            console.error("保存失败", error);
+            return showToast("❌ 保存至云端失败，请检查网络！");
         }
         
-        localStorage.setItem('ArchData_v2', JSON.stringify(records)); 
-        isRecordDirty = false; 
-        closeModal(); 
-        renderMainList();
+        showToast(currentEditingId ? '✅ 修改已同步至云端' : '✅ 新作品已云端入库');
+        await window.syncFromCloud(); // 重新拉取同步本地数组
+        isRecordDirty = false; closeModal(); renderMainList();
     };
 
     if (voteVal === 0 && (isScoreIncomplete || isReviewIncomplete)) {
-        let msgArr = [];
-        if (isScoreIncomplete) msgArr.push('部分小项未打分');
-        if (isReviewIncomplete) msgArr.push('未填写深度评语');
-        showConfirm('评价暂未完成', `系统检测到该作品【${msgArr.join('、')}】。\n是否先作为「待完善」记录暂存入库？`, () => {
-            executeSave();
-        }, 'warning');
-    } else {
-        executeSave();
-    }
+        let msgArr = []; if (isScoreIncomplete) msgArr.push('部分小项未打分'); if (isReviewIncomplete) msgArr.push('未填写深度评语');
+        showConfirm('评价暂未完成', `系统检测到该作品【${msgArr.join('、')}】。\n是否先作为「待完善」记录暂存入库？`, () => { executeSave(); }, 'warning');
+    } else { executeSave(); }
 };
 
+// 🚀 核心革新：云端删除逻辑
 els.delBtn.onclick = () => {
-    showConfirm('删除确认', `确定要将《${els.workName.value}》彻底删除吗？此操作无法撤销。`, () => {
-        let records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
-        records = records.filter(r => r.id !== currentEditingId);
-        localStorage.setItem('ArchData_v2', JSON.stringify(records));
-        showToast('记录已删除'); isRecordDirty = false; closeModal(); renderMainList();
-    },
-    'warning'
-);
+    showConfirm('删除确认', `确定要将《${els.workName.value}》彻底删除吗？此操作无法撤销。`, async () => {
+        const { error } = await supabaseClient.from('records').delete().eq('id', currentEditingId);
+        if (error) return showToast("❌ 云端删除失败！");
+
+        showToast('🗑️ 云端记录已彻底销毁'); 
+        await window.syncFromCloud(); // 重新同步
+        isRecordDirty = false; closeModal(); renderMainList();
+    }, 'warning');
 };
 
 // ================= 系统设置与框架管理 =================
 document.getElementById('openSettingsBtn').onclick = () => {
-    // 进入设置时，深拷贝一份当前的细则到缓冲区
     schemaBuffer = JSON.parse(JSON.stringify(activeSchemas)); 
-
-    els.settingsModal.classList.add('active'); 
-    document.body.style.overflow = 'hidden';
+    els.settingsModal.classList.add('active'); document.body.style.overflow = 'hidden';
     els.editorCatSelect.innerHTML = '';
     Object.keys(categoryTree).filter(k=>k!=='all').forEach(mainK => {
         const optgroup = document.createElement('optgroup'); optgroup.label = categoryTree[mainK].name;
         Object.keys(categoryTree[mainK].subs).forEach(subK => optgroup.appendChild(new Option(categoryTree[mainK].subs[subK], subK)));
         els.editorCatSelect.appendChild(optgroup);
     });
-    isSchemaDirty = false;
-    renderSchemaEditor();
-    renderStatusManager();
-    renderVoteReasonsManager();
+    isSchemaDirty = false; renderSchemaEditor(); renderStatusManager(); renderVoteReasonsManager();
 };
 
 function closeSettingsModal() {
-    if(isSchemaDirty) {
-        showConfirm('未保存警告', '你修改的评分细则尚未保存，确定要放弃修改吗？', () => {
-            els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; isSchemaDirty = false;
-        },
-        'warning'
-    );
-    } else { els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; }
+    if(isSchemaDirty) showConfirm('未保存警告', '你修改的评分细则尚未保存，确定要放弃修改吗？', () => { els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; isSchemaDirty = false; }, 'warning');
+    else { els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; }
 }
 document.getElementById('closeSettingsBtn').onclick = closeSettingsModal;
 
@@ -1470,119 +1105,63 @@ document.querySelectorAll('.setting-menu-item').forEach(item => {
     item.onclick = () => {
         document.querySelectorAll('.setting-menu-item').forEach(i => i.classList.remove('active'));
         document.querySelectorAll('.setting-section').forEach(s => s.classList.remove('active'));
-        item.classList.add('active');
-        document.getElementById(item.dataset.target).classList.add('active');
+        item.classList.add('active'); document.getElementById(item.dataset.target).classList.add('active');
     };
 });
 
 els.themeSelect.onchange = (e) => { localStorage.setItem('themePref_v2', e.target.value); applyTheme(e.target.value); };
-
-// 新增：重置作品状态标签逻辑
 els.resetStatusBtn.onclick = () => {
     showConfirm('重置状态确认', '将清空所有自定义的状态标签，并恢复为系统初始设置（如：已看、进行中等）。确定吗？', () => {
-        localStorage.removeItem('CustomStatuses_v2');
-        customStatuses = [...defaultStatuses]; // 恢复内存中的数据
-        renderStatusManager(); // 刷新设置里的列表
-        showToast('状态标签已恢复默认');
+        localStorage.removeItem('CustomStatuses_v2'); customStatuses = [...defaultStatuses]; 
+        renderStatusManager(); showToast('状态标签已恢复默认');
     });
 };
 
-// 恢复出厂设置：双重弹窗与最后抢救机制
 const finalOverlay = document.getElementById('finalConfirmOverlay');
+document.getElementById('factoryResetBtn').onclick = () => { showConfirm('高危操作：清空全部数据', '将清空所有已保存的评价记录！操作极其危险，请谨慎确认。', () => { finalOverlay.classList.add('active'); }, 'danger'); };
+document.getElementById('finalCancelBtn').onclick = () => { finalOverlay.classList.remove('active'); };
+document.getElementById('finalExportJsonBtn').onclick = () => { document.getElementById('exportJsonBtn').click(); showToast('✅ 抢救性备份已下载！'); };
 
-document.getElementById('factoryResetBtn').onclick = () => {
-    // 第一重：调用我们刚刚升级过带倒计时的常规危险警告
-    showConfirm('高危操作：清空全部数据', '将清空所有已保存的评价记录！操作极其危险，请谨慎确认。', () => {
-        // 倒计时结束且用户点击确定后，触发第二重终极确认弹窗
-        finalOverlay.classList.add('active');
-    }, 'danger');
-};
-
-// 终极弹窗的内部逻辑
-document.getElementById('finalCancelBtn').onclick = () => {
+// 🚀 核心革新：云端清库
+document.getElementById('finalOkBtn').onclick = async () => {
     finalOverlay.classList.remove('active');
-};
+    
+    // 危险：删除所有记录 (匹配 ID 不为空的数据)
+    const { error } = await supabaseClient.from('records').delete().neq('id', '0');
+    if (error) return showToast('❌ 云端清空失败');
 
-document.getElementById('finalExportJsonBtn').onclick = () => {
-    // 直接触发我们在下拉菜单里写好的 JSON 导出功能
-    document.getElementById('exportJsonBtn').click();
-    showToast('✅ 抢救性备份已下载！');
-};
-
-document.getElementById('finalOkBtn').onclick = () => {
-    finalOverlay.classList.remove('active');
-    localStorage.removeItem('ArchData_v2'); 
-    showToast('💥 数据已全部清空，迎来新生'); 
+    showToast('💥 云端数据已全部清空，迎来新生'); 
+    await window.syncFromCloud();
     renderMainList();
 };
 
 document.getElementById('resetSchemaBtn').onclick = () => {
     showConfirm('重置细则确认', '将清空所有自定义的评分维度，恢复为官方默认状态。确定吗？', () => {
-        localStorage.removeItem('CustomSchemas_v2');
-        activeSchemas = JSON.parse(JSON.stringify(defaultSchemas_v2));
-        // 如果面板开着，同步更新缓冲区
+        localStorage.removeItem('CustomSchemas_v2'); activeSchemas = JSON.parse(JSON.stringify(defaultSchemas_v2));
         if (schemaBuffer) schemaBuffer = JSON.parse(JSON.stringify(defaultSchemas_v2));
-        isSchemaDirty = false;
-        renderSchemaEditor();
-        showToast('细则已恢复默认');
+        isSchemaDirty = false; renderSchemaEditor(); showToast('细则已恢复默认');
     });
 };
 
 els.editorCatSelect.onchange = () => {
-    if(isSchemaDirty) {
-        showConfirm('切换分类提示', '当前分类的修改未保存，切换将丢失修改。确定切换吗？', () => {
-            isSchemaDirty = false; renderSchemaEditor();
-        },
-        'warning'
-);
-    } else { renderSchemaEditor(); }
+    if(isSchemaDirty) showConfirm('切换分类提示', '当前分类的修改未保存，切换将丢失修改。确定切换吗？', () => { isSchemaDirty = false; renderSchemaEditor(); }, 'warning');
+    else renderSchemaEditor();
 };
 
 function renderSchemaEditor() {
-    const catKey = els.editorCatSelect.value;
-    // 关键：这里读取缓冲区的数据
-    const schema = schemaBuffer[catKey];
-    els.schemaEditor.innerHTML = '';
-    
+    const catKey = els.editorCatSelect.value; const schema = schemaBuffer[catKey]; els.schemaEditor.innerHTML = '';
     schema.forEach((dim, dimIdx) => {
         let subsHtml = '';
         dim.subs.forEach((sub, subIdx) => {
-            subsHtml += `
-                <div class="editor-sub-row draggable-item" draggable="true" ondragstart="handleDragStart(event, 'schema_sub', ${subIdx}, ${dimIdx})" ondragover="handleDragOver(event, 'schema_sub', ${dimIdx})" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'schema_sub', ${subIdx}, ${dimIdx})" ondragend="handleDragEnd(event)">
-                    <div class="drag-handle" title="按住拖拽排序">☰</div>
-                    <input type="text" class="editor-sub-name-input" data-dim="${dimIdx}" data-sub="${subIdx}" data-type="name" value="${sub.name}" placeholder="小项名称">
-                    <input type="text" style="flex:1;" data-dim="${dimIdx}" data-sub="${subIdx}" data-type="desc" value="${sub.desc || ''}" placeholder="在这里输入问号悬浮释义...">
-                    <button class="btn-icon-del" style="font-size: 12px;" title="删除此小项" onclick="delSubItem('${catKey}', ${dimIdx}, ${subIdx})">✖</button>
-                </div>`;
+            subsHtml += `<div class="editor-sub-row draggable-item" draggable="true" ondragstart="handleDragStart(event, 'schema_sub', ${subIdx}, ${dimIdx})" ondragover="handleDragOver(event, 'schema_sub', ${dimIdx})" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'schema_sub', ${subIdx}, ${dimIdx})" ondragend="handleDragEnd(event)"><div class="drag-handle" title="按住拖拽排序">☰</div><input type="text" class="editor-sub-name-input" data-dim="${dimIdx}" data-sub="${subIdx}" data-type="name" value="${sub.name}" placeholder="小项名称"><input type="text" style="flex:1;" data-dim="${dimIdx}" data-sub="${subIdx}" data-type="desc" value="${sub.desc || ''}" placeholder="在这里输入问号悬浮释义..."><button class="btn-icon-del" style="font-size: 12px;" title="删除此小项" onclick="delSubItem('${catKey}', ${dimIdx}, ${subIdx})">✖</button></div>`;
         });
-
-        const html = `
-            <div class="editor-dim-card draggable-item" draggable="true" ondragstart="handleDragStart(event, 'schema_dim', ${dimIdx})" ondragover="handleDragOver(event, 'schema_dim')" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'schema_dim', ${dimIdx})" ondragend="handleDragEnd(event)">
-                <div class="editor-dim-header">
-                    <div class="drag-handle" title="按住拖拽排序">☰</div>
-                    <input type="text" style="flex:1; font-weight:bold; font-size:15px;" data-dim="${dimIdx}" data-type="dimName" value="${dim.name}">
-                    <div class="weight-input-wrapper">
-                        <span>权重</span>
-                        <input type="number" class="editor-dim-weight-input" data-dim="${dimIdx}" data-type="weight" value="${Math.round(dim.weight * 100)}" min="0" max="100">
-                        <span>%</span>
-                    </div>
-                    <button class="btn-icon-del" style="font-size: 16px; margin-left: 5px;" title="删除此大类" onclick="delDimension('${catKey}', ${dimIdx})">✖</button>
-                </div>
-                <div>${subsHtml}</div>
-                <div class="editor-add-block" style="padding: 6px; margin: 10px 0 0 15px; font-size: 12px;" onclick="addSubItem('${catKey}', ${dimIdx})">+ 添加子项</div>
-            </div>`;
+        const html = `<div class="editor-dim-card draggable-item" draggable="true" ondragstart="handleDragStart(event, 'schema_dim', ${dimIdx})" ondragover="handleDragOver(event, 'schema_dim')" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'schema_dim', ${dimIdx})" ondragend="handleDragEnd(event)"><div class="editor-dim-header"><div class="drag-handle" title="按住拖拽排序">☰</div><input type="text" style="flex:1; font-weight:bold; font-size:15px;" data-dim="${dimIdx}" data-type="dimName" value="${dim.name}"><div class="weight-input-wrapper"><span>权重</span><input type="number" class="editor-dim-weight-input" data-dim="${dimIdx}" data-type="weight" value="${Math.round(dim.weight * 100)}" min="0" max="100"><span>%</span></div><button class="btn-icon-del" style="font-size: 16px; margin-left: 5px;" title="删除此大类" onclick="delDimension('${catKey}', ${dimIdx})">✖</button></div><div>${subsHtml}</div><div class="editor-add-block" style="padding: 6px; margin: 10px 0 0 15px; font-size: 12px;" onclick="addSubItem('${catKey}', ${dimIdx})">+ 添加子项</div></div>`;
         els.schemaEditor.insertAdjacentHTML('beforeend', html);
     });
-    
     els.schemaEditor.insertAdjacentHTML('beforeend', `<div class="editor-add-block" onclick="addDimension('${catKey}')">+ 新增大评分维度</div>`);
-    
-
-    // 实时同步 Input 到缓冲区，防止排序时丢失刚才填写的文字
     els.schemaEditor.querySelectorAll('input').forEach(input => {
         input.oninput = (e) => {
-            isSchemaDirty = true;
-            const d = e.target.dataset;
-            const val = e.target.value;
+            isSchemaDirty = true; const d = e.target.dataset; const val = e.target.value;
             if(d.type === 'dimName') schema[d.dim].name = val;
             else if(d.type === 'weight') schema[d.dim].weight = parseInt(val) / 100;
             else if(d.type === 'name') schema[d.dim].subs[d.sub].name = val;
@@ -1591,278 +1170,143 @@ function renderSchemaEditor() {
     });
 }
 
-
-// 修复：精准恢复当前分类的默认细则，不再误伤全局
 window.triggerSchemaReset = () => {
-    const catKey = els.editorCatSelect.value;
-    const catName = els.editorCatSelect.options[els.editorCatSelect.selectedIndex].text;
-
+    const catKey = els.editorCatSelect.value; const catName = els.editorCatSelect.options[els.editorCatSelect.selectedIndex].text;
     showConfirm('重置确认', `确定要将【${catName}】的评分细则恢复为官方默认吗？此操作将立即覆盖并保存。`, () => {
-        // 仅从默认配置中深拷贝当前分类的数据
         activeSchemas[catKey] = JSON.parse(JSON.stringify(defaultSchemas_v2[catKey]));
         schemaBuffer[catKey] = JSON.parse(JSON.stringify(defaultSchemas_v2[catKey])); 
-        
-        // 将局部更新后的全局配置存回本地
         localStorage.setItem('CustomSchemas_v2', JSON.stringify(activeSchemas));
-        
-        isSchemaDirty = false;
-        renderSchemaEditor();
-        showToast(`已恢复【${catName}】的默认细则`);
+        isSchemaDirty = false; renderSchemaEditor(); showToast(`已恢复【${catName}】的默认细则`);
     });
 };
 
-// --- 细则管理的逻辑函数 ---
 window.moveDimension = (cat, idx, dir) => {
-    const schema = schemaBuffer[cat]; // 修复：改为操作缓冲区
-    if (idx + dir < 0 || idx + dir >= schema.length) return;
-    const temp = schema[idx];
-    schema[idx] = schema[idx+dir];
-    schema[idx+dir] = temp;
+    const schema = schemaBuffer[cat]; if (idx + dir < 0 || idx + dir >= schema.length) return;
+    const temp = schema[idx]; schema[idx] = schema[idx+dir]; schema[idx+dir] = temp;
     isSchemaDirty = true; renderSchemaEditor();
 };
 window.delDimension = (cat, idx) => {
     if(schemaBuffer[cat].length <= 1) return showToast('至少保留一个大类'); 
-    schemaBuffer[cat].splice(idx, 1); 
-    isSchemaDirty = true; 
-    renderSchemaEditor();
-    showToast('大类已移除 (未保存前均可撤销)'); // 给个轻量提示，增强安全感
+    schemaBuffer[cat].splice(idx, 1); isSchemaDirty = true; renderSchemaEditor(); showToast('大类已移除 (未保存前均可撤销)'); 
 };
 window.addDimension = (cat) => {
-    schemaBuffer[cat].push({ id: 'dim_'+Date.now(), name: '新维度', weight: 0, subs: [{id: 'sub_'+Date.now(), name: '新子项', desc: ''}] }); // 修复：改为操作缓冲区
+    schemaBuffer[cat].push({ id: 'dim_'+Date.now(), name: '新维度', weight: 0, subs: [{id: 'sub_'+Date.now(), name: '新子项', desc: ''}] }); 
     isSchemaDirty = true; renderSchemaEditor();
 };
 window.moveSubItem = (cat, dimIdx, subIdx, dir) => {
-    const subs = schemaBuffer[cat][dimIdx].subs; // 修复：改为操作缓冲区
-    if (subIdx + dir < 0 || subIdx + dir >= subs.length) return;
-    const temp = subs[subIdx];
-    subs[subIdx] = subs[subIdx+dir];
-    subs[subIdx+dir] = temp;
+    const subs = schemaBuffer[cat][dimIdx].subs; if (subIdx + dir < 0 || subIdx + dir >= subs.length) return;
+    const temp = subs[subIdx]; subs[subIdx] = subs[subIdx+dir]; subs[subIdx+dir] = temp;
     isSchemaDirty = true; renderSchemaEditor();
 };
 window.delSubItem = (cat, dimIdx, subIdx) => {
-    if(schemaBuffer[cat][dimIdx].subs.length <= 1) return showToast('至少保留一个子项'); // 修复：改为操作缓冲区
-    schemaBuffer[cat][dimIdx].subs.splice(subIdx, 1); // 修复：改为操作缓冲区
-    isSchemaDirty = true; renderSchemaEditor();
+    if(schemaBuffer[cat][dimIdx].subs.length <= 1) return showToast('至少保留一个子项'); 
+    schemaBuffer[cat][dimIdx].subs.splice(subIdx, 1); isSchemaDirty = true; renderSchemaEditor();
 };
 window.addSubItem = (cat, dimIdx) => {
-    schemaBuffer[cat][dimIdx].subs.push({ id: 'sub_'+Date.now(), name: '新子项', desc: '' }); // 修复：改为操作缓冲区
+    schemaBuffer[cat][dimIdx].subs.push({ id: 'sub_'+Date.now(), name: '新子项', desc: '' }); 
     isSchemaDirty = true; renderSchemaEditor();
 };
 
 document.getElementById('saveSchemaBtn').onclick = () => {
-    const catKey = els.editorCatSelect.value;
-    const schema = schemaBuffer[catKey];
-    
-    // 校验权重
-    let weightSum = 0;
-    schema.forEach(dim => weightSum += Math.round(dim.weight * 100));
+    const catKey = els.editorCatSelect.value; const schema = schemaBuffer[catKey];
+    let weightSum = 0; schema.forEach(dim => weightSum += Math.round(dim.weight * 100));
     if (weightSum !== 100) return showToast(`⚠️ 权重总和必须为 100% (当前为 ${weightSum}%)`);
-
-    // 将缓冲区数据正式应用到 activeSchemas
     activeSchemas = JSON.parse(JSON.stringify(schemaBuffer)); 
     localStorage.setItem('CustomSchemas_v2', JSON.stringify(activeSchemas));
-    
-    isSchemaDirty = false;
-    showToast('✅ 系统评分框架已更新！');
-    renderSchemaEditor();
+    isSchemaDirty = false; showToast('✅ 系统评分框架已更新！'); renderSchemaEditor();
 };
 
-// ================= 全局拖拽排序引擎 (HTML5 D&D) =================
-let dragCtx = null;
-let dragScrollSpeed = 0;
-let dragScrollRAF = null;
-
+// ================= 全局拖拽排序引擎 =================
+let dragCtx = null; let dragScrollSpeed = 0; let dragScrollRAF = null;
 const doDragScroll = () => {
-    if (dragCtx && dragScrollSpeed !== 0) {
-        const box = document.querySelector('.settings-content');
-        if (box) box.scrollTop += dragScrollSpeed;
-    }
+    if (dragCtx && dragScrollSpeed !== 0) { const box = document.querySelector('.settings-content'); if (box) box.scrollTop += dragScrollSpeed; }
     if (dragCtx) dragScrollRAF = requestAnimationFrame(doDragScroll);
 };
-
 window.handleDragStart = (e, type, idx, extra = null) => {
-    e.stopPropagation(); 
-    dragCtx = { type, idx, extra };
-    // 兼容优化：精准锁定拖拽包裹层
-    const item = e.target.closest('.draggable-item'); 
-    setTimeout(() => { if(item) item.classList.add('dragging'); }, 0); 
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', ''); 
-    
-    dragScrollSpeed = 0;
-    if (!dragScrollRAF) dragScrollRAF = requestAnimationFrame(doDragScroll);
+    e.stopPropagation(); dragCtx = { type, idx, extra };
+    const item = e.target.closest('.draggable-item'); setTimeout(() => { if(item) item.classList.add('dragging'); }, 0); 
+    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', ''); 
+    dragScrollSpeed = 0; if (!dragScrollRAF) dragScrollRAF = requestAnimationFrame(doDragScroll);
 };
-
 window.handleDragOver = (e, type, extra = null) => {
     if (!dragCtx || dragCtx.type !== type || dragCtx.extra !== extra) return;
-    e.preventDefault(); 
-    e.stopPropagation(); 
-    e.dataTransfer.dropEffect = 'move';
-    
-    // 🚀 终极防抖：先清除所有人的粉线，再精准给当前选中的人加上
+    e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'move';
     document.querySelectorAll('.drop-over').forEach(el => el.classList.remove('drop-over'));
-    const item = e.target.closest('.draggable-item');
-    if (item) item.classList.add('drop-over'); 
+    const item = e.target.closest('.draggable-item'); if (item) item.classList.add('drop-over'); 
 };
-
-window.handleDragLeave = (e) => {
-    e.stopPropagation();
-    // 依靠上面的精准清除逻辑，这里直接置空，彻底消灭嵌套子元素引发的闪烁 Bug！
-};
-
+window.handleDragLeave = (e) => { e.stopPropagation(); };
 window.handleDragEnd = (e) => {
-    e.stopPropagation();
-    document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('dragging', 'drop-over'));
-    dragCtx = null;
-    cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null;
+    e.stopPropagation(); document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('dragging', 'drop-over'));
+    dragCtx = null; cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null;
 };
-
 window.handleDrop = (e, type, toIdx, extra = null) => {
     if (!dragCtx || dragCtx.type !== type || dragCtx.extra !== extra) return;
-    e.preventDefault();
-    e.stopPropagation(); 
+    e.preventDefault(); e.stopPropagation(); 
     document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('drop-over'));
-    
-    const fromIdx = dragCtx.idx;
-    if (fromIdx === toIdx) { dragCtx = null; cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null; return; }
-
-    const moveArr = (arr, from, to) => {
-        const item = arr.splice(from, 1)[0];
-        arr.splice(to, 0, item);
-    };
-
-    if (type === 'status') {
-        moveArr(customStatuses, fromIdx, toIdx);
-        localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
-        renderStatusManager();
-    } else if (type === 'vote_approve') {
-        moveArr(customVoteReasons.approve, fromIdx, toIdx);
-        localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
-        renderVoteReasonsManager();
-    } else if (type === 'vote_veto') {
-        moveArr(customVoteReasons.veto, fromIdx, toIdx);
-        localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
-        renderVoteReasonsManager();
-    } else if (type === 'schema_dim') {
-        const catKey = els.editorCatSelect.value;
-        moveArr(schemaBuffer[catKey], fromIdx, toIdx);
-        isSchemaDirty = true; renderSchemaEditor();
-    } else if (type === 'schema_sub') {
-        const catKey = els.editorCatSelect.value;
-        moveArr(schemaBuffer[catKey][extra].subs, fromIdx, toIdx);
-        isSchemaDirty = true; renderSchemaEditor();
-    }
-    dragCtx = null;
-    cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null;
+    const fromIdx = dragCtx.idx; if (fromIdx === toIdx) { dragCtx = null; cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null; return; }
+    const moveArr = (arr, from, to) => { const item = arr.splice(from, 1)[0]; arr.splice(to, 0, item); };
+    if (type === 'status') { moveArr(customStatuses, fromIdx, toIdx); localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses)); renderStatusManager(); } 
+    else if (type === 'vote_approve') { moveArr(customVoteReasons.approve, fromIdx, toIdx); localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons)); renderVoteReasonsManager(); } 
+    else if (type === 'vote_veto') { moveArr(customVoteReasons.veto, fromIdx, toIdx); localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons)); renderVoteReasonsManager(); } 
+    else if (type === 'schema_dim') { const catKey = els.editorCatSelect.value; moveArr(schemaBuffer[catKey], fromIdx, toIdx); isSchemaDirty = true; renderSchemaEditor(); } 
+    else if (type === 'schema_sub') { const catKey = els.editorCatSelect.value; moveArr(schemaBuffer[catKey][extra].subs, fromIdx, toIdx); isSchemaDirty = true; renderSchemaEditor(); }
+    dragCtx = null; cancelAnimationFrame(dragScrollRAF); dragScrollRAF = null;
 };
-
-// ================= 拖拽时的边缘平滑滚动增强 (突破原生限制版) =================
 window.addEventListener('dragover', (e) => {
-    if (!dragCtx) return;
-    const box = document.querySelector('.settings-content');
-    if (!box) return;
-
-    const rect = box.getBoundingClientRect();
-    // 🚀 大类优化：感应区从 100 扩大到 160px，只要稍微靠近边缘就能起飞
-    const buffer = 160; 
-
-    // 🚀 速度优化：极限速度拉升至 35px/帧，大距离跨越毫无压力
-    if (e.clientY > 0 && e.clientY < rect.top + buffer) {
-        dragScrollSpeed = -Math.min(35, (buffer - (e.clientY - rect.top)) * 0.5);
-    } else if (e.clientY > 0 && e.clientY > rect.bottom - buffer) {
-        dragScrollSpeed = Math.min(35, (buffer - (rect.bottom - e.clientY)) * 0.5);
-    } else {
-        dragScrollSpeed = 0; 
-    }
+    if (!dragCtx) return; const box = document.querySelector('.settings-content'); if (!box) return;
+    const rect = box.getBoundingClientRect(); const buffer = 160; 
+    if (e.clientY > 0 && e.clientY < rect.top + buffer) dragScrollSpeed = -Math.min(35, (buffer - (e.clientY - rect.top)) * 0.5);
+    else if (e.clientY > 0 && e.clientY > rect.bottom - buffer) dragScrollSpeed = Math.min(35, (buffer - (rect.bottom - e.clientY)) * 0.5);
+    else dragScrollSpeed = 0; 
 }, true);
 
-// --- 状态标签管理 ---
 function renderStatusManager() {
     els.statusList.innerHTML = '';
     customStatuses.forEach((status, idx) => {
-        const div = document.createElement('div'); 
-        div.className = 'status-item draggable-item';
-        
-        // 绑定原生拖拽生命周期
-        div.draggable = true;
-        div.ondragstart = (e) => handleDragStart(e, 'status', idx);
-        div.ondragover = (e) => handleDragOver(e, 'status');
-        div.ondragleave = handleDragLeave;
-        div.ondrop = (e) => handleDrop(e, 'status', idx);
-        div.ondragend = handleDragEnd;
-        
-        div.innerHTML = `
-            <div style="display:flex; align-items:center; gap:5px;">
-                <div class="drag-handle" title="按住拖拽排序">☰</div>
-                <span>${status}</span>
-            </div>
-            <button class="btn-icon-del" onclick="delStatus(${idx})">✖</button>
-        `;
+        const div = document.createElement('div'); div.className = 'status-item draggable-item';
+        div.draggable = true; div.ondragstart = (e) => handleDragStart(e, 'status', idx); div.ondragover = (e) => handleDragOver(e, 'status'); div.ondragleave = handleDragLeave; div.ondrop = (e) => handleDrop(e, 'status', idx); div.ondragend = handleDragEnd;
+        div.innerHTML = `<div style="display:flex; align-items:center; gap:5px;"><div class="drag-handle" title="按住拖拽排序">☰</div><span>${status}</span></div><button class="btn-icon-del" onclick="delStatus(${idx})">✖</button>`;
         els.statusList.appendChild(div);
     });
-    // 底部复刻重置按钮
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'btn-danger-outline';
-    resetBtn.style.cssText = "width:100%; margin-top:20px; border-style:dashed;";
-    resetBtn.textContent = "⚠️ 恢复默认状态列表";
-    resetBtn.onclick = () => els.resetStatusBtn.click();
+    const resetBtn = document.createElement('button'); resetBtn.className = 'btn-danger-outline'; resetBtn.style.cssText = "width:100%; margin-top:20px; border-style:dashed;"; resetBtn.textContent = "⚠️ 恢复默认状态列表"; resetBtn.onclick = () => els.resetStatusBtn.click();
     els.statusList.appendChild(resetBtn);
 }
-
 window.moveStatus = (idx, dir) => {
     if (idx + dir < 0 || idx + dir >= customStatuses.length) return;
-    const temp = customStatuses[idx];
-    customStatuses[idx] = customStatuses[idx+dir];
-    customStatuses[idx+dir] = temp;
-    localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
-    renderStatusManager();
+    const temp = customStatuses[idx]; customStatuses[idx] = customStatuses[idx+dir]; customStatuses[idx+dir] = temp;
+    localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses)); renderStatusManager();
 };
-
 document.getElementById('addStatusBtn').onclick = () => {
-    const input = document.getElementById('newStatusInput');
-    const val = input.value.trim();
-    if(!val) return;
+    const input = document.getElementById('newStatusInput'); const val = input.value.trim(); if(!val) return;
     if(customStatuses.includes(val)) return showToast('该状态已存在');
-    customStatuses.push(val);
-    localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
-    input.value = ''; renderStatusManager(); showToast('状态已添加');
+    customStatuses.push(val); localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses)); input.value = ''; renderStatusManager(); showToast('状态已添加');
 };
-
 window.delStatus = function(idx) {
     if(customStatuses.length <= 1) return showToast('至少保留一个状态标签');
-    customStatuses.splice(idx, 1);
-    localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
-    renderStatusManager();
+    customStatuses.splice(idx, 1); localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses)); renderStatusManager();
 }
 
-// ================= 精确时间提取工具 =================
 function formatPreciseTime(rec) {
-    // 从底层 id 或 createdAt 提取毫秒级时间戳
     const ts = parseInt(rec.createdAt || rec.id); 
     if (ts && !isNaN(ts) && ts > 1000000000000) {
-        const d = new Date(ts);
-        const pad = n => String(n).padStart(2, '0');
+        const d = new Date(ts); const pad = n => String(n).padStart(2, '0');
         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
-    return rec.date; // 如果解析失败，兜底返回旧版短日期
+    return rec.date; 
 }
 
-// ================= 导出引擎 (CSV / TXT) =================
 function getExportFilename(ext) {
-    const now = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    // 在这里加上了 getSeconds()
+    const now = new Date(); const pad = n => String(n).padStart(2, '0');
     const timeStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
     return `牛人影音志_v${APP_VERSION}_${timeStr}.${ext}`;
 }
 
 function generateExportData() {
-    const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    const records = window.cloudRecords; // ☁️ 改用云端数据
     if(records.length === 0) { showToast('暂无数据可导出'); return null; }
     return records;
 }
 
-// 导出 CSV
 document.getElementById('exportCsvBtn').onclick = () => {
     const records = generateExportData(); if(!records) return;
     let csv = "data:text/csv;charset=utf-8,\uFEFF";
@@ -1870,476 +1314,229 @@ document.getElementById('exportCsvBtn').onclick = () => {
     records.forEach(r => { 
         const mainCatName = categoryTree[r.mainCat] ? categoryTree[r.mainCat].name : r.mainCat;
         let details = [];
-        if(activeSchemas[r.subCat]) {
-            activeSchemas[r.subCat].forEach(dim => {
-                dim.subs.forEach(sub => { if(r.scores && r.scores[sub.id] !== undefined) details.push(`${sub.name}:${r.scores[sub.id]}`); });
-            });
-        }
+        if(activeSchemas[r.subCat]) { activeSchemas[r.subCat].forEach(dim => { dim.subs.forEach(sub => { if(r.scores && r.scores[sub.id] !== undefined) details.push(`${sub.name}:${r.scores[sub.id]}`); }); }); }
         const hasScore = r.finalScore > 0 || r.isVeto || r.voteStatus === -1;
-        const dStar = hasScore ? renderStars(r.finalScore) : "未评";
-        const bLabel = hasScore ? getBangumiLabel(r.finalScore, true) : "未评";
-        
-        const isProtectStr = (r.voteStatus === 1 || r.isProtect) ? "是" : "否";
-        const isVetoStr = (r.voteStatus === -1 || r.isVeto) ? "是" : "否";
-        
-        let incompleteStr = [];
-        if (r.isScoreIncomplete) incompleteStr.push("缺分数");
-        if (r.isReviewIncomplete) incompleteStr.push("无评语");
-
+        const dStar = hasScore ? renderStars(r.finalScore) : "未评"; const bLabel = hasScore ? getBangumiLabel(r.finalScore, true) : "未评";
+        const isProtectStr = (r.voteStatus === 1 || r.isProtect) ? "是" : "否"; const isVetoStr = (r.voteStatus === -1 || r.isVeto) ? "是" : "否";
+        let incompleteStr = []; if (r.isScoreIncomplete) incompleteStr.push("缺分数"); if (r.isReviewIncomplete) incompleteStr.push("无评语");
         let safeReview = (r.review || '').replace(/"/g, '""').replace(/\n/g, ' '); 
         csv += `"${mainCatName}","${r.subCatText}","${r.name}","${r.status}",${r.finalScore},"${dStar}","${bLabel}",${isProtectStr},${isVetoStr},"${r.voteReason || ''}","${incompleteStr.join('|')}","${details.join(' | ')}","${safeReview}","${formatPreciseTime(r)}"\n`; 
     });
     triggerDownload(csv, getExportFilename('csv'));
 };
 
-// 导出 TXT (排版优化的阅读版)
 document.getElementById('exportTxtBtn').onclick = () => {
     const records = generateExportData(); if(!records) return;
-    let txtStr = `=================================================\n`;
-    txtStr += ` 牛人影音志 档案备份 (v${APP_VERSION})\n`;
-    txtStr += ` 导出时间: ${new Date().toLocaleString()}\n`;
-    txtStr += ` 共计收录: ${records.length} 部作品\n`;
-    txtStr += `=================================================\n\n`;
-
+    let txtStr = `=================================================\n 牛人影音志 档案备份 (v${APP_VERSION})\n 导出时间: ${new Date().toLocaleString()}\n 共计收录: ${records.length} 部作品\n=================================================\n\n`;
     records.forEach(r => {
         const mainCatName = categoryTree[r.mainCat] ? categoryTree[r.mainCat].name : r.mainCat;
-        txtStr += `【 ${r.name} 】\n`;
-        txtStr += `> 分类：${mainCatName} - ${r.subCatText}\n`;
-        txtStr += `> 状态：${r.status}  |  入库时间：${formatPreciseTime(r)}\n`;
-        
+        txtStr += `【 ${r.name} 】\n> 分类：${mainCatName} - ${r.subCatText}\n> 状态：${r.status}  |  入库时间：${formatPreciseTime(r)}\n`;
         const hasScore = r.finalScore > 0 || r.isVeto || r.voteStatus === -1;
-        if (hasScore) {
-            txtStr += `> 综合得分：${r.finalScore}  (豆瓣: ${renderStars(r.finalScore)} | Bangumi: ${getBangumiLabel(r.finalScore, true)})\n`;
-        } else {
-            txtStr += `> 综合得分：未评级\n`;
-        }
-
+        if (hasScore) txtStr += `> 综合得分：${r.finalScore}  (豆瓣: ${renderStars(r.finalScore)} | Bangumi: ${getBangumiLabel(r.finalScore, true)})\n`;
+        else txtStr += `> 综合得分：未评级\n`;
         if (r.voteStatus === 1 || r.isProtect) txtStr += `> 特殊判定：🌟 一票赞成 (${r.voteReason || '无'})\n`;
         if (r.voteStatus === -1 || r.isVeto) txtStr += `> 特殊判定：💣 一票否决 (${r.voteReason || '无'})\n`;
-
         let details = [];
-        if(activeSchemas[r.subCat]) {
-            activeSchemas[r.subCat].forEach(dim => {
-                dim.subs.forEach(sub => { if(r.scores && r.scores[sub.id] !== undefined) details.push(`${sub.name}:${r.scores[sub.id]}`); });
-            });
-        }
+        if(activeSchemas[r.subCat]) { activeSchemas[r.subCat].forEach(dim => { dim.subs.forEach(sub => { if(r.scores && r.scores[sub.id] !== undefined) details.push(`${sub.name}:${r.scores[sub.id]}`); }); }); }
         if (details.length > 0) txtStr += `> 小项明细：${details.join(' | ')}\n`;
-        
-        txtStr += `> 深度剖析：\n${r.review || '暂无详细评语...'}\n`;
-        txtStr += `-------------------------------------------------\n\n`;
+        txtStr += `> 深度剖析：\n${r.review || '暂无详细评语...'}\n-------------------------------------------------\n\n`;
     });
-
-    // 转换为 Data URL
     const txtData = "data:text/plain;charset=utf-8,\uFEFF" + encodeURIComponent(txtStr);
     triggerDownload(txtData, getExportFilename('txt'));
 };
 
-// 导出 JSON (全量无损存档，包含所有自定义设置与记录)
 document.getElementById('exportJsonBtn').onclick = () => {
-    // 读取数据，即便是空数据（还没打过分），也允许导出自定义的细则框架
-    const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
-    
-    // 收集所有系统层面的自定义配置
+    const records = window.cloudRecords; // ☁️ 改用云端数据
     const settings = {
-        customSchemas: activeSchemas, 
-        customStatuses: customStatuses,
-        customVoteReasons: customVoteReasons, 
-        theme: localStorage.getItem('themePref_v2') || 'auto',
-        displayMode: localStorage.getItem('displayModePref_v2') || 'system',
-        timeDisplayMode: localStorage.getItem('timeDisplayPref_v2') || 'updated',
-        confirmDelayPrefs: JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}')
+        customSchemas: activeSchemas, customStatuses: customStatuses, customVoteReasons: customVoteReasons, 
+        theme: localStorage.getItem('themePref_v2') || 'auto', displayMode: localStorage.getItem('displayModePref_v2') || 'system',
+        timeDisplayMode: localStorage.getItem('timeDisplayPref_v2') || 'updated', confirmDelayPrefs: JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}')
     };
-
-    // 组装标准化的“系统级存档结构”
-    const fullArchive = {
-        meta: {
-            app: "NiurenMediaLog", // 标识印记
-            version: APP_VERSION,  // 记录导出时的版本号，方便未来做跨版本兼容
-            exportTime: Date.now()
-        },
-        settings: settings,        // 客制化设置包
-        data: records              // 核心记录包
-    };
-    
+    const fullArchive = { meta: { app: "NiurenMediaLog", version: APP_VERSION, exportTime: Date.now() }, settings: settings, data: records };
     const jsonStr = JSON.stringify(fullArchive, null, 2);
     const dataUrl = "data:application/json;charset=utf-8,\uFEFF" + encodeURIComponent(jsonStr);
-    
     triggerDownload(dataUrl, getExportFilename('json'));
 };
 
-// 导入 JSON (解析全量存档并覆盖本地数据)
+// 🚀 核心革新：云端导入还原
 document.getElementById('importJsonFile').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = function(event) {
         try {
             const importedData = JSON.parse(event.target.result);
-            
-            // 1. 校验文件指纹，防止导入无关 JSON
             if (!importedData.meta || importedData.meta.app !== "NiurenMediaLog") {
-                e.target.value = ''; // 重置 input
-                return showToast('❌ 导入失败：无法识别的牛人影音志存档格式');
+                e.target.value = ''; return showToast('❌ 导入失败：无法识别的牛人影音志存档格式');
             }
-
-            // 2. 触发高危倒计时弹窗拦截
-            showConfirm('数据覆盖警告', `识别到来自 v${importedData.meta.version} 版本的存档。导入将直接覆盖你当前所有的评价记录和自定义设置。强烈建议在此之前先导出一份当前数据的 JSON 备用。确定要继续吗？`, () => {
+            showConfirm('数据覆盖警告', `识别到来自 v${importedData.meta.version} 版本的存档。导入将直接覆盖云端所有的评价记录和自定义设置。确定要继续吗？`, async () => {
                 
-                // --- 开始核爆级覆盖还原 ---
-                
-                // 恢复打分记录
-                if (importedData.data) {
-                    localStorage.setItem('ArchData_v2', JSON.stringify(importedData.data));
+                if (importedData.data && importedData.data.length > 0) {
+                    const { error } = await supabaseClient.from('records').upsert(importedData.data);
+                    if(error) return showToast('❌ 云端数据还原失败');
                 }
 
-                // 恢复自定义客制化设置
                 if (importedData.settings) {
-                    if (importedData.settings.customSchemas) {
-                        activeSchemas = importedData.settings.customSchemas;
-                        localStorage.setItem('CustomSchemas_v2', JSON.stringify(activeSchemas));
-                    }
-                    if (importedData.settings.customStatuses) {
-                        customStatuses = importedData.settings.customStatuses;
-                        localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses));
-                    }
-                    // 👇 新增这一块：解析并恢复一票词条设置
-                    if (importedData.settings.customVoteReasons) {
-                        customVoteReasons = importedData.settings.customVoteReasons;
-                        localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons));
-                    }
-                    // 👆 新增结束
-                    if (importedData.settings.theme) {
-                        localStorage.setItem('themePref_v2', importedData.settings.theme);
-                        els.themeSelect.value = importedData.settings.theme;
-                        applyTheme(importedData.settings.theme);
-                    }
-                    if (importedData.settings.displayMode) {
-                        localStorage.setItem('displayModePref_v2', importedData.settings.displayMode);
-                        els.displayModeSelect.value = importedData.settings.displayMode;
-                    }
-                    // 👇 新增：导入时恢复时间显示偏好
-                    if (importedData.settings.timeDisplayMode) {
-                        localStorage.setItem('timeDisplayPref_v2', importedData.settings.timeDisplayMode);
-                        if (document.getElementById('timeDisplayModeSelect')) {
-                            document.getElementById('timeDisplayModeSelect').value = importedData.settings.timeDisplayMode;
-                        }
-                    }
-                    if (importedData.settings.confirmDelayPrefs) {
-                        localStorage.setItem('confirmDelayPrefs_v2', JSON.stringify(importedData.settings.confirmDelayPrefs));
-                        document.getElementById('delayDangerInput').value = importedData.settings.confirmDelayPrefs.danger;
-                        document.getElementById('delayWarningInput').value = importedData.settings.confirmDelayPrefs.warning;
-                    }
+                    if (importedData.settings.customSchemas) { activeSchemas = importedData.settings.customSchemas; localStorage.setItem('CustomSchemas_v2', JSON.stringify(activeSchemas)); }
+                    if (importedData.settings.customStatuses) { customStatuses = importedData.settings.customStatuses; localStorage.setItem('CustomStatuses_v2', JSON.stringify(customStatuses)); }
+                    if (importedData.settings.customVoteReasons) { customVoteReasons = importedData.settings.customVoteReasons; localStorage.setItem('CustomVoteReasons_v2', JSON.stringify(customVoteReasons)); }
+                    if (importedData.settings.theme) { localStorage.setItem('themePref_v2', importedData.settings.theme); els.themeSelect.value = importedData.settings.theme; applyTheme(importedData.settings.theme); }
+                    if (importedData.settings.displayMode) { localStorage.setItem('displayModePref_v2', importedData.settings.displayMode); els.displayModeSelect.value = importedData.settings.displayMode; }
+                    if (importedData.settings.timeDisplayMode) { localStorage.setItem('timeDisplayPref_v2', importedData.settings.timeDisplayMode); if (document.getElementById('timeDisplayModeSelect')) { document.getElementById('timeDisplayModeSelect').value = importedData.settings.timeDisplayMode; } }
+                    if (importedData.settings.confirmDelayPrefs) { localStorage.setItem('confirmDelayPrefs_v2', JSON.stringify(importedData.settings.confirmDelayPrefs)); document.getElementById('delayDangerInput').value = importedData.settings.confirmDelayPrefs.danger; document.getElementById('delayWarningInput').value = importedData.settings.confirmDelayPrefs.warning; }
                 }
 
-                showToast('✅ 存档导入成功！正在重载数据...');
-                e.target.value = ''; // 重置 input，允许重新导入同一个文件
+                showToast('✅ 云端存档导入成功！正在重载数据...'); e.target.value = ''; 
                 
-                // 3. 内存变量与 UI 界面热更新
-                renderMainList();
-                renderStatusManager();
-                renderVoteReasonsManager(); // 👈 补上这句！刷新一票词条 UI
-                if (els.settingsModal.classList.contains('active')) {
-                    schemaBuffer = JSON.parse(JSON.stringify(activeSchemas)); // 同步最新框架到缓冲区
-                    renderSchemaEditor();
-                }
-            }, 'danger'); // 属于高危操作，调用防手滑倒计时
-
-        } catch (err) {
-            showToast('❌ 读取失败：JSON 文件解析异常或已损坏');
-            console.error(err);
-            e.target.value = '';
-        }
+                await window.syncFromCloud(); // 重新拉取云端数据
+                renderMainList(); renderStatusManager(); renderVoteReasonsManager(); 
+                if (els.settingsModal.classList.contains('active')) { schemaBuffer = JSON.parse(JSON.stringify(activeSchemas)); renderSchemaEditor(); }
+            }, 'danger'); 
+        } catch (err) { showToast('❌ 读取失败：JSON 文件解析异常或已损坏'); console.error(err); e.target.value = ''; }
     };
     reader.readAsText(file);
 });
 
 function triggerDownload(dataUrl, filename) {
-    const link = document.createElement("a"); 
-    link.href = dataUrl; 
-    link.download = filename; 
-    document.body.appendChild(link); 
-    link.click(); 
-    document.body.removeChild(link); 
-    showToast(`成功导出：${filename}`);
+    const link = document.createElement("a"); link.href = dataUrl; link.download = filename; 
+    document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast(`成功导出：${filename}`);
 }
 
-// ================= 新手教程 =================
 const tutData = [
     { img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80', title: '欢迎来到牛人影音志', desc: '告别一拍脑袋的打分！在这里，我们用十余种专属分类、几十套精细的评价维度，为你建立最严谨的私人精神食粮档案馆。' },
     { img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80', title: '10分制加权算法与一票机制', desc: '每一个细分项都将参与最终加权计算。鼠标悬浮在 ❓ 号上可查看释义。遇到意义非凡或触碰底线的作品？果断使用“白月光”与“踩雷”一票机制。' },
     { img: 'https://images.unsplash.com/photo-1588421357574-87938a86fa28?auto=format&fit=crop&w=600&q=80', title: '属于你的私人定制', desc: '在【系统设置】中，你可以自由修改每一个评分维度、权重、释义，甚至自定义“搁置”、“二刷中”等作品状态，打造你的终极评价体系。' }
 ];
 let tutIndex = 0;
-
 function updateTutorial() {
-    document.getElementById('tutImg').src = tutData[tutIndex].img;
-    document.getElementById('tutTitle').textContent = tutData[tutIndex].title;
-    document.getElementById('tutDesc').textContent = tutData[tutIndex].desc;
+    document.getElementById('tutImg').src = tutData[tutIndex].img; document.getElementById('tutTitle').textContent = tutData[tutIndex].title; document.getElementById('tutDesc').textContent = tutData[tutIndex].desc;
     document.querySelectorAll('.tut-dot').forEach((d, i) => { d.className = i === tutIndex ? 'tut-dot active' : 'tut-dot'; });
-    document.getElementById('tutPrevBtn').style.opacity = tutIndex === 0 ? '0' : '1';
-    document.getElementById('tutPrevBtn').style.pointerEvents = tutIndex === 0 ? 'none' : 'auto';
+    document.getElementById('tutPrevBtn').style.opacity = tutIndex === 0 ? '0' : '1'; document.getElementById('tutPrevBtn').style.pointerEvents = tutIndex === 0 ? 'none' : 'auto';
     document.getElementById('tutNextBtn').textContent = tutIndex === tutData.length - 1 ? '开始使用' : '下一步';
 }
-
-function openTutorial() {
-    tutIndex = 0; updateTutorial();
-    document.getElementById('tutorialOverlay').classList.add('active');
-}
-
+function openTutorial() { tutIndex = 0; updateTutorial(); document.getElementById('tutorialOverlay').classList.add('active'); }
 document.getElementById('tutPrevBtn').onclick = () => { if(tutIndex > 0) { tutIndex--; updateTutorial(); } };
 document.getElementById('tutNextBtn').onclick = () => { 
     if(tutIndex < tutData.length - 1) { tutIndex++; updateTutorial(); } 
-    else { 
-        document.getElementById('tutorialOverlay').classList.remove('active'); 
-        localStorage.setItem('hasSeenTutorial_v2', 'true');
-    }
+    else { document.getElementById('tutorialOverlay').classList.remove('active'); localStorage.setItem('hasSeenTutorial_v2', 'true'); }
 };
+document.getElementById('reopenTutorialBtn').onclick = () => { els.settingsModal.classList.remove('active'); document.body.style.overflow = ''; openTutorial(); };
 
-document.getElementById('reopenTutorialBtn').onclick = () => {
-    els.settingsModal.classList.remove('active'); document.body.style.overflow = '';
-    openTutorial();
-};
-
-// ================= 全局快捷键与遮罩层点击关闭 =================
-// 1. 点击遮罩层(空白磨砂处)关闭弹窗
-els.modal.addEventListener('click', (e) => {
-    if (e.target === els.modal) closeModal();
-});
-
-els.settingsModal.addEventListener('click', (e) => {
-    if (e.target === els.settingsModal) closeSettingsModal();
-});
-
+els.modal.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
+els.settingsModal.addEventListener('click', (e) => { if (e.target === els.settingsModal) closeSettingsModal(); });
 const tutOverlayEl = document.getElementById('tutorialOverlay');
-tutOverlayEl.addEventListener('click', (e) => {
-    if (e.target === tutOverlayEl) {
-        tutOverlayEl.classList.remove('active');
-        localStorage.setItem('hasSeenTutorial_v2', 'true');
-    }
-});
+tutOverlayEl.addEventListener('click', (e) => { if (e.target === tutOverlayEl) { tutOverlayEl.classList.remove('active'); localStorage.setItem('hasSeenTutorial_v2', 'true'); } });
+document.getElementById('confirmOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('confirmOverlay')) { document.getElementById('confirmCancelBtn').click(); } });
+document.getElementById('finalConfirmOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('finalConfirmOverlay')) { document.getElementById('finalCancelBtn').click(); } });
 
-// 针对防呆二次确认弹窗，点击外面等同于点击“取消”
-document.getElementById('confirmOverlay').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('confirmOverlay')) {
-        document.getElementById('confirmCancelBtn').click();
-    }
-});
-
-document.getElementById('finalConfirmOverlay').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('finalConfirmOverlay')) {
-        document.getElementById('finalCancelBtn').click();
-    }
-});
-
-// 2. 监听 ESC 键关闭弹窗
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        // 按照 UI 层级从高到低依次拦截，防止一次按键关掉所有窗口
-        
-        // 层级 0：沉浸式全屏写作模式
-        if (document.getElementById('zenOverlay').classList.contains('active')) {
-            closeZenMode();
-            return;
-        }
-
-        // 层级 1：终极警告弹窗
-        if (document.getElementById('finalConfirmOverlay').classList.contains('active')) {
-            document.getElementById('finalCancelBtn').click();
-            return;
-        }
-        // 层级 2：普通警告弹窗
-        if (document.getElementById('confirmOverlay').classList.contains('active')) {
-            document.getElementById('confirmCancelBtn').click();
-            return;
-        }
-        // 层级 3：新手教程
-        if (tutOverlayEl.classList.contains('active')) {
-            tutOverlayEl.classList.remove('active');
-            localStorage.setItem('hasSeenTutorial_v2', 'true');
-            return;
-        }
-        // 层级 4：设置面板
-        if (els.settingsModal.classList.contains('active')) {
-            closeSettingsModal();
-            return;
-        }
-        // 层级 5：评价编辑面板
-        if (els.modal.classList.contains('active')) {
-            closeModal();
-            return;
-        }
-        // 层级 6：数据看板
-        if (document.getElementById('dashboardModal').classList.contains('active')) {
-            document.getElementById('dashboardModal').classList.remove('active');
-            document.body.style.overflow = '';
-            return;
-        }
+        if (document.getElementById('zenOverlay').classList.contains('active')) { closeZenMode(); return; }
+        if (document.getElementById('finalConfirmOverlay').classList.contains('active')) { document.getElementById('finalCancelBtn').click(); return; }
+        if (document.getElementById('confirmOverlay').classList.contains('active')) { document.getElementById('confirmCancelBtn').click(); return; }
+        if (tutOverlayEl.classList.contains('active')) { tutOverlayEl.classList.remove('active'); localStorage.setItem('hasSeenTutorial_v2', 'true'); return; }
+        if (els.settingsModal.classList.contains('active')) { closeSettingsModal(); return; }
+        if (els.modal.classList.contains('active')) { closeModal(); return; }
+        if (document.getElementById('dashboardModal').classList.contains('active')) { document.getElementById('dashboardModal').classList.remove('active'); document.body.style.overflow = ''; return; }
     }
 });
 
-// 点击外部关闭数据看板
 document.getElementById('dashboardModal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('dashboardModal')) {
-        document.getElementById('dashboardModal').classList.remove('active');
-        document.body.style.overflow = '';
-    }
+    if (e.target === document.getElementById('dashboardModal')) { document.getElementById('dashboardModal').classList.remove('active'); document.body.style.overflow = ''; }
 });
 
 // ================= 数据洞察看板核心引擎 =================
-let dashCatChartInst = null;
-let dashScoreChartInst = null;
+let dashCatChartInst = null; let dashScoreChartInst = null;
 
 document.getElementById('openDashboardBtn').onclick = () => {
-    document.getElementById('dashboardModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    renderDashboardData();
+    document.getElementById('dashboardModal').classList.add('active'); document.body.style.overflow = 'hidden'; renderDashboardData();
 };
-
-document.getElementById('closeDashboardBtn').onclick = () => {
-    document.getElementById('dashboardModal').classList.remove('active');
-    document.body.style.overflow = '';
-};
+document.getElementById('closeDashboardBtn').onclick = () => { document.getElementById('dashboardModal').classList.remove('active'); document.body.style.overflow = ''; };
 
 function renderDashboardData() {
-    const records = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+    const records = window.cloudRecords; // ☁️ 改用云端数据
     
-    // 1. 顶部基础数据计算
     document.getElementById('dashTotal').textContent = records.length;
-    
     const scoredRecs = records.filter(r => (parseFloat(r.finalScore) > 0 || r.voteStatus !== 0) && !r.isScoreIncomplete);
     const avg = scoredRecs.length ? (scoredRecs.reduce((sum, r) => sum + parseFloat(r.finalScore), 0) / scoredRecs.length).toFixed(1) : '0.0';
     document.getElementById('dashAvgScore').textContent = avg;
-
     document.getElementById('dashApprove').textContent = records.filter(r => r.voteStatus === 1).length;
     document.getElementById('dashVeto').textContent = records.filter(r => r.voteStatus === -1).length;
 
-    // 👇 新增：计算最常打的分数 (众数算法)
     let mostFreqScore = '暂无';
     if (scoredRecs.length > 0) {
         const scoreCounts = {};
-        scoredRecs.forEach(r => {
-            const s = parseFloat(r.finalScore).toFixed(1);
-            scoreCounts[s] = (scoreCounts[s] || 0) + 1;
-        });
-        // 找出出现次数最多的分数
+        scoredRecs.forEach(r => { const s = parseFloat(r.finalScore).toFixed(1); scoreCounts[s] = (scoreCounts[s] || 0) + 1; });
         mostFreqScore = Object.keys(scoreCounts).reduce((a, b) => scoreCounts[a] > scoreCounts[b] ? a : b);
     }
     document.getElementById('dashMostFreqScore').textContent = mostFreqScore;
 
-    if (records.length === 0) return; // 无数据直接返回
+    if (records.length === 0) return; 
 
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const textColor = isDark ? '#e2e8f0' : '#2c3e50';
-    const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+    const textColor = isDark ? '#e2e8f0' : '#2c3e50'; const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
 
-    // 2. 饼图：领域分布演算
     const catCounts = {};
-    records.forEach(r => {
-        const name = categoryTree[r.mainCat] ? categoryTree[r.mainCat].name : '其他';
-        catCounts[name] = (catCounts[name] || 0) + 1;
-    });
+    records.forEach(r => { const name = categoryTree[r.mainCat] ? categoryTree[r.mainCat].name : '其他'; catCounts[name] = (catCounts[name] || 0) + 1; });
     
     if(dashCatChartInst) dashCatChartInst.destroy();
     dashCatChartInst = new Chart(document.getElementById('dashCatChart').getContext('2d'), {
         type: 'doughnut',
-        data: {
-            labels: Object.keys(catCounts),
-            datasets: [{
-                data: Object.values(catCounts),
-                backgroundColor: ['#f09199', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22'],
-                borderWidth: isDark ? 2 : 0, borderColor: isDark ? '#1e1e1e' : '#fff'
-            }]
-        },
+        data: { labels: Object.keys(catCounts), datasets: [{ data: Object.values(catCounts), backgroundColor: ['#f09199', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22'], borderWidth: isDark ? 2 : 0, borderColor: isDark ? '#1e1e1e' : '#fff' }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: textColor, font: {size: 11} } } } }
     });
 
-    // 3. 柱状图：评分分布演算 (区间分段)
     const scoreBins = {'9-10分(神作)':0, '8-9分(优秀)':0, '7-8分(良好)':0, '6-7分(及格)':0, '6分以下(雷区)':0};
     scoredRecs.forEach(r => {
         const s = parseFloat(r.finalScore);
-        if(s >= 9) scoreBins['9-10分(神作)']++;
-        else if(s >= 8) scoreBins['8-9分(优秀)']++;
-        else if(s >= 7) scoreBins['7-8分(良好)']++;
-        else if(s >= 6) scoreBins['6-7分(及格)']++;
-        else scoreBins['6分以下(雷区)']++;
+        if(s >= 9) scoreBins['9-10分(神作)']++; else if(s >= 8) scoreBins['8-9分(优秀)']++; else if(s >= 7) scoreBins['7-8分(良好)']++; else if(s >= 6) scoreBins['6-7分(及格)']++; else scoreBins['6分以下(雷区)']++;
     });
 
     if(dashScoreChartInst) dashScoreChartInst.destroy();
     dashScoreChartInst = new Chart(document.getElementById('dashScoreChart').getContext('2d'), {
         type: 'bar',
-        data: {
-            labels: Object.keys(scoreBins),
-            datasets: [{
-                label: '作品数量',
-                data: Object.values(scoreBins),
-                backgroundColor: ['#f09199', '#3498db', '#f1c40f', '#bdc3c7', '#e74c3c'],
-                borderRadius: 6
-            }]
-        },
+        data: { labels: Object.keys(scoreBins), datasets: [{ label: '作品数量', data: Object.values(scoreBins), backgroundColor: ['#f09199', '#3498db', '#f1c40f', '#bdc3c7', '#e74c3c'], borderRadius: 6 }] },
         options: { 
-            responsive: true, maintainAspectRatio: false, 
-            plugins: { legend: { display: false } },
-            scales: { 
-                y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor }, grid: { color: gridColor } },
-                x: { ticks: { color: textColor, font: {size: 11} }, grid: { display: false } }
-            }
+            responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor }, grid: { color: gridColor } }, x: { ticks: { color: textColor, font: {size: 11} }, grid: { display: false } } }
         }
     });
 
-    // 4. 荣誉墙演算 (Top 3 & Bottom 3)
     const sortedRecs = [...scoredRecs].sort((a,b) => parseFloat(b.finalScore) - parseFloat(a.finalScore));
-    const top3 = sortedRecs.slice(0, 3);
-    const bottom3 = [...sortedRecs].reverse().slice(0, 3);
+    const top3 = sortedRecs.slice(0, 3); const bottom3 = [...sortedRecs].reverse().slice(0, 3);
 
     const renderHof = (arr, containerId, defaultColor) => {
         const html = arr.length > 0 ? arr.map(r => {
-            let color = defaultColor;
-            if(r.voteStatus === 1) color = 'var(--warning)';
-            if(r.voteStatus === -1) color = 'var(--danger)';
-            return `<div class="hof-item">
-                        <span class="hof-name" title="${r.name}">${r.name}</span>
-                        <span class="hof-score" style="color: ${color};">${parseFloat(r.finalScore).toFixed(1)}</span>
-                    </div>`;
+            let color = defaultColor; if(r.voteStatus === 1) color = 'var(--warning)'; if(r.voteStatus === -1) color = 'var(--danger)';
+            return `<div class="hof-item"><span class="hof-name" title="${r.name}">${r.name}</span><span class="hof-score" style="color: ${color};">${parseFloat(r.finalScore).toFixed(1)}</span></div>`;
         }).join('') : '<div style="text-align:center; color:var(--text-muted); padding: 10px 0;">暂无足够数据</div>';
         document.getElementById(containerId).innerHTML = html;
     };
 
-    renderHof(top3, 'hofTopList', '#f39c12');
-    renderHof(bottom3, 'hofBottomList', '#e74c3c');
+    renderHof(top3, 'hofTopList', '#f39c12'); renderHof(bottom3, 'hofBottomList', '#e74c3c');
 }
 
-// ================= 页面级防丢拦截 (意外刷新/关闭标签页) =================
-window.addEventListener('beforeunload', (e) => {
-    // 如果评价面板或细则设置面板有未保存的脏数据
-    if (isRecordDirty || isSchemaDirty) {
-        // 触发浏览器原生的关闭确认弹窗（现代浏览器会统一显示标准警告文案）
-        e.preventDefault();
-        e.returnValue = ''; 
-    }
-});
+window.addEventListener('beforeunload', (e) => { if (isRecordDirty || isSchemaDirty) { e.preventDefault(); e.returnValue = ''; } });
 
-// ================= 云端迁移专用工具 =================
-window.migrateToCloud = async () => {
-    // 1. 从本地挖出老数据
-    const localData = JSON.parse(localStorage.getItem('ArchData_v2') || '[]');
+// 🚀 核心革新：启动时强制拉取云端数据
+async function init() {
+    const savedTheme = localStorage.getItem('themePref_v2') || 'auto'; els.themeSelect.value = savedTheme; applyTheme(savedTheme);
+    const savedDisplayMode = localStorage.getItem('displayModePref_v2') || 'system'; els.displayModeSelect.value = savedDisplayMode;
+    const savedTimePref = localStorage.getItem('timeDisplayPref_v2') || 'updated'; document.getElementById('timeDisplayModeSelect').value = savedTimePref;
+    document.getElementById('timeDisplayModeSelect').onchange = (e) => { localStorage.setItem('timeDisplayPref_v2', e.target.value); renderMainList(); };
+    document.querySelectorAll('.versionText').forEach(el => el.textContent = APP_VERSION);
+    renderChangelog();
     
-    if (localData.length === 0) {
-        return alert("本地没有找到数据，无需搬家！");
-    }
+    const delayPrefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}');
+    document.getElementById('delayDangerInput').value = delayPrefs.danger; document.getElementById('delayWarningInput').value = delayPrefs.warning;
+    const updateDelayPrefs = () => { localStorage.setItem('confirmDelayPrefs_v2', JSON.stringify({ danger: parseInt(document.getElementById('delayDangerInput').value) || 0, warning: parseInt(document.getElementById('delayWarningInput').value) || 0 })); };
+    document.getElementById('delayDangerInput').addEventListener('change', updateDelayPrefs); document.getElementById('delayWarningInput').addEventListener('change', updateDelayPrefs);
 
-    console.log(`🚚 检测到 ${localData.length} 条本地记录，正在发往云端...`);
+    // ☁️ 等待云端数据同步完成...
+    await window.syncFromCloud();
     
-    // 2. 批量推送到 Supabase 的 records 表中
-    const { error } = await supabaseClient.from('records').upsert(localData);
-    
-    if (error) {
-        console.error("❌ 搬家失败:", error);
-        alert("搬家失败，请按 F12 查看控制台报错: " + error.message);
-    } else {
-        alert("✅ 恭喜牛人！所有本地记录已成功升入云端！");
-        console.log("数据已全部就位！");
-    }
-};
+    initNavTabs(); initCascader(); renderMainList();
+    if(!localStorage.getItem('hasSeenTutorial_v2')) setTimeout(openTutorial, 500);
+    initHoverPreview();
+}
 
 init();
