@@ -1,8 +1,8 @@
 // 🚀 牛人影音志 v1.3.0 - 满血云端版
 
 // 🌟 1. 唤醒 Supabase 云端心脏
-const SUPABASE_URL = '在这里填入你的_Project_URL'; 
-const SUPABASE_ANON_KEY = '在这里填入你的_anon_public_key'; 
+const SUPABASE_URL = 'https://ytyioshanxbamrgahdgu.supabase.co'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_gf0ESfEYeYLZ9lXKTIDcsQ_TfHHEeFv'; 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ================= 系统版本与更新日志配置中心 =================
