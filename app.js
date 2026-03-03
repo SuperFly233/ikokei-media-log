@@ -201,25 +201,70 @@ const debouncedRechart = debounce(() => { if(els.modal.classList.contains('activ
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => { if(localStorage.getItem('themePref_v2') === 'auto') applyTheme('auto'); });
 
 function renderChangelog() {
-    const container = document.getElementById('changelogContainer'); if(!container) return; container.innerHTML = '';
+    const container = document.getElementById('changelogContainer'); 
+    if(!container) return; 
+    container.innerHTML = '';
+    
+    // 创建沉浸式内嵌框
+    const wrapper = document.createElement('div');
+    wrapper.className = 'changelog-box';
+    
     APP_CHANGELOG.forEach((log, index) => {
         const isCurrent = index === 0;
-        const wrapperStyle = isCurrent ? `background: var(--score-bg); padding: 16px; border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.03);` : `padding: 16px 12px; border-bottom: 1px dashed var(--border-color);`;
-        const titleHtml = isCurrent ? `<strong style="color: var(--primary); font-size: 16px; letter-spacing: 0.5px;">v${log.version}</strong> <span style="font-size:12px; color:var(--text-muted); font-weight: bold; margin-left: 6px;">(${log.date || '未知日期'})</span>` : `<strong style="color: var(--text-main); font-size: 15px;">v${log.version}</strong> <span style="font-size:11px; color:var(--text-muted); margin-left: 8px;">${log.date || ''}</span>`;
+        
+        // 渲染日期和版本号
+        let headerHtml = `<div class="log-version-header ${isCurrent ? 'current' : ''}">`;
+        if (log.date) headerHtml += `<span class="log-date">${log.date}</span>`;
+        headerHtml += `<span class="log-ver">v${log.version}</span>`;
+        headerHtml += `</div>`;
+        
         const lis = log.changes.map(c => {
+            // 匹配 [标签] 后面的内容
             const match = c.match(/^\[(.*?)\]\s*(.*)/);
             if (match) {
-                const tag = match[1]; const text = match[2]; let tagStyle = '';
-                if (tag.includes('新特性') || tag.includes('里程碑') || tag.includes('突破')) tagStyle = 'background: rgba(52, 152, 219, 0.1); color: var(--link-color); border: 1px solid rgba(52, 152, 219, 0.3);';
-                else if (tag.includes('优化')) tagStyle = 'background: rgba(241, 196, 15, 0.15); color: #d68910; border: 1px solid rgba(241, 196, 15, 0.4);';
-                else if (tag.includes('修复')) tagStyle = 'background: rgba(231, 76, 60, 0.1); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3);';
-                else tagStyle = 'background: var(--border-color); color: var(--text-muted); border: 1px solid transparent;';
-                return `<li style="margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px;"><span style="font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; white-space: nowrap; line-height: 1.2; ${tagStyle}; flex-shrink: 0; margin-top: 2px;">${tag}</span><span style="line-height: 1.5; color: var(--text-main);">${text}</span></li>`;
+                const tag = match[1]; 
+                const rawText = match[2]; 
+                let tagClass = 'default';
+                
+                // 智能判断标签颜色
+                if (tag.includes('新特性') || tag.includes('新增') || tag.includes('里程碑') || tag.includes('突破')) tagClass = 'feat';
+                else if (tag.includes('优化') || tag.includes('改进')) tagClass = 'opt';
+                else if (tag.includes('修复')) tagClass = 'fix';
+                
+                // 🌟 核心魔法：识别冒号，拆分标题和详情
+                let title = '';
+                let desc = rawText;
+                const colonIndex = rawText.search(/[:：]/); // 同时兼容中英文冒号
+                if (colonIndex !== -1) {
+                    title = rawText.substring(0, colonIndex).trim();
+                    desc = rawText.substring(colonIndex + 1).trim();
+                }
+
+                let contentHtml = '';
+                if (title) {
+                    contentHtml = `<span class="log-title">${title}</span><span class="log-desc">${desc}</span>`;
+                } else {
+                    contentHtml = `<span class="log-desc">${desc}</span>`;
+                }
+                
+                return `<div class="log-item">
+                            <span class="log-tag log-tag-${tagClass}">${tag}</span>
+                            <div class="log-content">${contentHtml}</div>
+                        </div>`;
             }
-            return `<li style="margin-bottom: 8px; margin-left: 18px; list-style-type: disc; line-height: 1.5; color: var(--text-main);">${c}</li>`;
+            // 如果没有 [标签]，则作为普通列表项
+            return `<div class="log-item normal"><span class="log-desc">${c}</span></div>`;
         }).join('');
-        container.insertAdjacentHTML('beforeend', `<div style="${wrapperStyle}">${titleHtml}<ul style="margin-top: 14px; font-size: 13px; list-style: none; padding-left: 0;">${lis}</ul></div>`);
+        
+        wrapper.insertAdjacentHTML('beforeend', `
+            <div class="log-block">
+                ${headerHtml}
+                <div class="log-list">${lis}</div>
+            </div>
+        `);
     });
+    
+    container.appendChild(wrapper);
 }
 
 // ================= 灵动预览核心引擎 =================
@@ -721,9 +766,48 @@ document.getElementById('closeDashboardBtn').onclick = () => { document.getEleme
 
 function renderDashboardData() {
     const records = window.cloudRecords; 
-    document.getElementById('dashTotal').textContent = records.length; const scoredRecs = records.filter(r => (parseFloat(r.finalScore) > 0 || r.voteStatus !== 0) && !r.isScoreIncomplete); const avg = scoredRecs.length ? (scoredRecs.reduce((sum, r) => sum + parseFloat(r.finalScore), 0) / scoredRecs.length).toFixed(1) : '0.0'; document.getElementById('dashAvgScore').textContent = avg; document.getElementById('dashApprove').textContent = records.filter(r => r.voteStatus === 1).length; document.getElementById('dashVeto').textContent = records.filter(r => r.voteStatus === -1).length;
-    let mostFreqScore = '暂无'; if (scoredRecs.length > 0) { const scoreCounts = {}; scoredRecs.forEach(r => { const s = parseFloat(r.finalScore).toFixed(1); scoreCounts[s] = (scoreCounts[s] || 0) + 1; }); mostFreqScore = Object.keys(scoreCounts).reduce((a, b) => scoreCounts[a] > scoreCounts[b] ? a : b); } document.getElementById('dashMostFreqScore').textContent = mostFreqScore;
+    document.getElementById('dashTotal').textContent = records.length; 
+    const scoredRecs = records.filter(r => (parseFloat(r.finalScore) > 0 || r.voteStatus !== 0) && !r.isScoreIncomplete); 
+    const avg = scoredRecs.length ? (scoredRecs.reduce((sum, r) => sum + parseFloat(r.finalScore), 0) / scoredRecs.length).toFixed(1) : '0.0'; 
+    document.getElementById('dashAvgScore').textContent = avg; 
+    document.getElementById('dashApprove').textContent = records.filter(r => r.voteStatus === 1).length; 
+    document.getElementById('dashVeto').textContent = records.filter(r => r.voteStatus === -1).length;
+
+    // 🌟 v1.3.2 核心算法跃升：下钻统计所有“子项小分”
+    let totalSubScoresCount = 0;
+    const subScoreCounts = {};
+    records.forEach(r => {
+        if (r.scores) {
+            Object.values(r.scores).forEach(score => {
+                const s = parseInt(score);
+                if (s > 0) { // 过滤掉未打分的 0 分
+                    totalSubScoresCount++;
+                    subScoreCounts[s] = (subScoreCounts[s] || 0) + 1;
+                }
+            });
+        }
+    });
+
+    const freqEl = document.getElementById('dashMostFreqScore');
+    const freqLabelEl = document.getElementById('dashMostFreqLabel');
+    const totalSubEl = document.getElementById('dashTotalSubScores');
+
+    if (totalSubScoresCount > 0) {
+        // 算出给得最多的小分，以及给过的次数
+        const mostFreqScore = Object.keys(subScoreCounts).reduce((a, b) => subScoreCounts[a] > subScoreCounts[b] ? a : b);
+        const mostFreqCount = subScoreCounts[mostFreqScore];
+        
+        if(freqEl) freqEl.innerHTML = `${mostFreqScore} <span style="font-size:16px; color:var(--text-muted); font-weight:normal;">分</span>`;
+        if(freqLabelEl) freqLabelEl.innerHTML = `最偏爱分数 (共给过 ${mostFreqCount} 次)`;
+    } else {
+        if(freqEl) freqEl.textContent = '暂无';
+        if(freqLabelEl) freqLabelEl.textContent = '最偏爱子项分';
+    }
+    if(totalSubEl) totalSubEl.textContent = totalSubScoresCount;
+
     if (records.length === 0) return; 
+
+    // ---- 下面是原本的图表渲染逻辑，保持不变 ----
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const textColor = isDark ? '#e2e8f0' : '#2c3e50'; const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
     const catCounts = {}; records.forEach(r => { const name = categoryTree[r.mainCat] ? categoryTree[r.mainCat].name : '其他'; catCounts[name] = (catCounts[name] || 0) + 1; });
     if(dashCatChartInst) dashCatChartInst.destroy();

@@ -76,6 +76,11 @@
 
 <div class="main-container"><div class="record-grid" id="recordGrid"></div></div>
 
+<div class="main-footer">
+    Copyright &copy; 2026 ikokei. All rights reserved.<br>
+    <span style="font-size: 11px;">Powered by Supabase & Chart.js</span>
+</div>
+
 <button class="fab-add" id="fabAddBtn">+</button>
 
 <div class="modal-overlay" id="editModal">
@@ -194,9 +199,14 @@
                     <div class="stat-val" id="dashVeto" style="color: var(--danger);">0</div>
                     <div class="stat-label">💣 一票否决</div>
                 </div>
+                
                 <div class="stat-card">
-                    <div class="stat-val" id="dashMostFreqScore" style="color: #9b59b6;">0.0</div>
-                    <div class="stat-label">最常打的分数</div>
+                    <div class="stat-val" id="dashMostFreqScore" style="color: #9b59b6;">暂无</div>
+                    <div class="stat-label" id="dashMostFreqLabel">最偏爱子项分</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="dashTotalSubScores" style="color: #2ecc71;">0</div>
+                    <div class="stat-label">累计评定细分项</div>
                 </div>
             </div>
             
@@ -379,20 +389,22 @@
                     </div>
                 </div>
                 <div class="setting-section" id="set-about">
-                    <h3 style="margin-bottom: 20px; font-size: 16px;">关于 牛人影音志</h3>
-                    <div class="doc-content">
-                        <p style="font-size: 16px; color: var(--primary); font-weight: bold;">当前版本：v<span class="versionText"></span></p>
-                        <p>牛人影音志是一个专为热爱阅读、观影、游戏的你打造的纯本地化、强自定义、多维度评分系统。</p>
-                        <p>我们的愿景是：拒绝一拍脑袋的打分，用极其严谨的框架记录下每一份精神食粮带来的感动与思考。你的数据永远属于你自己（数据仅保存在当前浏览器本地，请定期导出备份）。</p>
-                        
-                        <div style="margin-top: 20px; padding: 15px; background: var(--bg-color); border-radius: 8px; border-left: 4px solid var(--primary);">
-                            <p style="margin-bottom: 5px;"><strong>👨‍💻 系统作者：</strong>ikokei</p>
-                            <p><strong>📧 联系邮箱：</strong><a href="mailto:super_fly@foxmail.com" style="color: var(--link-color); text-decoration: none;">super_fly@foxmail.com</a></p>
-                        </div>
-
-                        <h3 style="margin-top: 30px;">版本更新日志</h3>
-                        <div id="changelogContainer"></div>
+                    <div class="about-header">
+                        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f09199'/><path d='M32 70 V30 L68 70 V30' stroke='%23ffffff' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>" class="about-logo">
+                        <div class="about-title">牛人影音志</div>
+                        <div class="about-subtitle">v<span class="versionText"></span></div>
                     </div>
+                    
+                    <div class="about-author">
+                        由 <span style="color: var(--primary); font-weight: bold;">ikokei</span> 为您呈现。<br>
+                        <a href="mailto:super_fly@foxmail.com" style="color: var(--text-muted); text-decoration: none; border-bottom: 1px dashed var(--border-color);">super_fly@foxmail.com</a>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px; padding: 12px; background: rgba(52, 152, 219, 0.05); border-left: 3px solid var(--link-color); border-radius: 0 8px 8px 0; color: var(--link-color); font-size: 13px; text-align: left;">
+                        🚀 <strong>提示：</strong>目前本项目正处于高速迭代与繁荣进化中，数据已全面接入 Supabase 云端引擎。更多硬核功能敬请期待！
+                    </div>
+
+                    <div id="changelogContainer"></div>
                 </div>
             </div>
         </div>
