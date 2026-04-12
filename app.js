@@ -1,4 +1,4 @@
-// 🚀 牛人影音志 v1.3.0 - 满血云端漫游版
+// 🚀 牛人影音志 v1.4.0 - 重装上阵优化版
 
 // 🌟 1. 唤醒 Supabase 云端心脏
 const SUPABASE_URL = 'https://ytyioshanxbamrgahdgu.supabase.co'; 
@@ -63,7 +63,7 @@ window.saveSettingsToCloud = async (silent = true) => {
         theme: localStorage.getItem('themePref_v2') || 'auto',
         displayMode: localStorage.getItem('displayModePref_v2') || 'system',
         timeDisplayMode: localStorage.getItem('timeDisplayPref_v2') || 'updated',
-        confirmDelayPrefs: JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}')
+        confirmDelayPrefs: JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 0}')
     };
     const { error } = await supabaseClient.from('settings').upsert({ id: 'global', payload: payload, updated_at: Date.now() });
     if (error) console.error("配置同步失败", error);
@@ -163,7 +163,7 @@ function showConfirm(title, message, onConfirmCallback, type = 'danger') {
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
     
-    const prefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}');
+    const prefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 0}');
     let delayTime = prefs[type] !== undefined ? parseInt(prefs[type]) : 3;
 
     overlay.classList.add('active'); let timer = null;
@@ -272,7 +272,7 @@ let hoverTimer = null; const previewEl = document.getElementById('hoverPreview')
 function initHoverPreview() {
     document.getElementById('recordGrid').addEventListener('mouseover', (e) => {
         const card = e.target.closest('.record-card'); if (!card) return;
-        const id = card.getAttribute('data-id'); const rec = window.cloudRecords.find(r => r.id === id); if (!rec) return;
+        const id = card.getAttribute('data-id'); const rec = window.cloudRecords.find(r => String(r.id) === String(id)); if (!rec) return;
         hoverTimer = setTimeout(() => { showPreview(rec, card); }, 500);
     });
     document.getElementById('recordGrid').addEventListener('mouseout', () => { clearTimeout(hoverTimer); previewEl.classList.remove('active'); });
@@ -474,7 +474,7 @@ els.status.addEventListener('change', () => isRecordDirty = true);
 // ================= 实时重名检测与跳转引擎 =================
 els.workName.addEventListener('input', debounce(function() {
     const name = this.value.trim().toLowerCase(); const hintEl = document.getElementById('duplicateHint'); if (!name) { hintEl.innerHTML = ''; return; }
-    const dup = window.cloudRecords.find(r => r.name.toLowerCase() === name && r.id !== currentEditingId);
+    const dup = window.cloudRecords.find(r => r.name.toLowerCase() === name && String(r.id) !== String(currentEditingId));
     if (dup) hintEl.innerHTML = `⚠️ 馆内已有此记录：<a href="javascript:void(0)" onclick="jumpToRecord('${dup.id}')" style="color:var(--link-color); text-decoration:underline;">立即前往编辑原记录</a>`; else hintEl.innerHTML = '';
 }, 300));
 window.jumpToRecord = (id) => { isRecordDirty = false; document.getElementById('editModal').classList.remove('active'); document.body.style.overflow = ''; setTimeout(() => openModal(id), 150); showToast('已跳转至原有记录'); };
@@ -519,7 +519,7 @@ window.resetVoteReasons = () => { showConfirm('重置词条确认', '清空所�
 function openModal(id = null) {
     document.getElementById('duplicateHint').innerHTML = ''; currentEditingId = id; els.delBtn.style.display = id ? 'block' : 'none'; renderStatusDropdown(); isRecordDirty = false;
     if (id) { 
-        const rec = window.cloudRecords.find(r => r.id === id); document.getElementById('modalTitle').textContent = '修改评价记录';
+        const rec = window.cloudRecords.find(r => String(r.id) === String(id)); document.getElementById('modalTitle').textContent = '修改评价记录';
         const timeContainer = document.getElementById('timeInfoContainer'); timeContainer.style.display = 'flex';
         document.getElementById('createTimeLabel').textContent = `🌱 创建于：${formatPreciseTime({ createdAt: rec.createdAt || rec.id })}`;
         document.getElementById('updateTimeLabel').textContent = `🔄 修改于：${formatPreciseTime({ createdAt: rec.updatedAt || rec.createdAt || rec.id })}`;
@@ -573,7 +573,7 @@ document.getElementById('closeModalBtn').onclick = closeModal;
 document.getElementById('saveRecordBtn').onclick = async () => {
     const saveBtn = document.getElementById('saveRecordBtn'); if (saveBtn.disabled) return; 
     const newName = els.workName.value.trim(); if(!newName) return showToast('作品名称不能为空！');
-    const records = window.cloudRecords; const isDuplicate = records.some(r => r.name.toLowerCase() === newName.toLowerCase() && r.id !== currentEditingId);
+    const records = window.cloudRecords; const isDuplicate = records.some(r => r.name.toLowerCase() === newName.toLowerCase() && String(r.id) !== String(currentEditingId));
     if (isDuplicate) return showConfirm('作品重名警告', `馆内已存在名为《${newName}》的记录。请修改名称或编辑原记录。`, async () => {}, 'warning');
     const voteVal = parseInt(els.voteSlider.value); const voteReason = els.voteReasonInput.value.trim();
     if (voteVal !== 0 && !voteReason) return showToast('启用一票机制时，必须填写具体判定原因！');
@@ -585,7 +585,7 @@ document.getElementById('saveRecordBtn').onclick = async () => {
         saveBtn.disabled = true; saveBtn.innerHTML = '⏳ 正在同步云端...'; saveBtn.style.opacity = '0.7'; saveBtn.style.cursor = 'wait';
         try {
             const now = Date.now(); let finalCreatedAt = now; 
-            if (currentEditingId) { const oldRec = records.find(r => r.id === currentEditingId); if (oldRec) finalCreatedAt = oldRec.createdAt || parseInt(oldRec.id) || now; }
+            if (currentEditingId) { const oldRec = records.find(r => String(r.id) === String(currentEditingId)); if (oldRec) finalCreatedAt = oldRec.createdAt || parseInt(oldRec.id) || now; }
             const rec = {
                 id: currentEditingId || now.toString(), name: newName, mainCat: els.mainCat.value, subCat: els.subCat.value, subCatText: els.subCat.options[els.subCat.selectedIndex].text, status: els.status.value, review: els.review.value,
                 voteStatus: voteVal, voteReason: voteVal !== 0 ? voteReason : '', voteScore: voteVal !== 0 ? parseFloat(els.voteScoreInput.value) : undefined, isScoreIncomplete: isScoreIncomplete, isReviewIncomplete: isReviewIncomplete, scores: { ...activeScores }, 
@@ -706,7 +706,7 @@ document.getElementById('exportTxtBtn').onclick = () => {
 };
 document.getElementById('exportJsonBtn').onclick = () => {
     const records = window.cloudRecords; 
-    const settings = { customSchemas: activeSchemas, customStatuses: customStatuses, customVoteReasons: customVoteReasons, theme: localStorage.getItem('themePref_v2') || 'auto', displayMode: localStorage.getItem('displayModePref_v2') || 'system', timeDisplayMode: localStorage.getItem('timeDisplayPref_v2') || 'updated', confirmDelayPrefs: JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}') };
+    const settings = { customSchemas: activeSchemas, customStatuses: customStatuses, customVoteReasons: customVoteReasons, theme: localStorage.getItem('themePref_v2') || 'auto', displayMode: localStorage.getItem('displayModePref_v2') || 'system', timeDisplayMode: localStorage.getItem('timeDisplayPref_v2') || 'updated', confirmDelayPrefs: JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 0}') };
     const fullArchive = { meta: { app: "NiurenMediaLog", version: APP_VERSION, exportTime: Date.now() }, settings: settings, data: records };
     const jsonStr = JSON.stringify(fullArchive, null, 2); const dataUrl = "data:application/json;charset=utf-8,\uFEFF" + encodeURIComponent(jsonStr); triggerDownload(dataUrl, getExportFilename('json'));
 };
@@ -773,7 +773,7 @@ function renderDashboardData() {
     document.getElementById('dashApprove').textContent = records.filter(r => r.voteStatus === 1).length; 
     document.getElementById('dashVeto').textContent = records.filter(r => r.voteStatus === -1).length;
 
-    // 🌟 v1.3.2 核心算法跃升：下钻统计所有“子项小分”
+    // 🌟 v1.4.0 核心算法跃升：下钻统计所有“子项小分”
     let totalSubScoresCount = 0;
     const subScoreCounts = {};
     records.forEach(r => {
@@ -851,7 +851,7 @@ async function init() {
     
     document.querySelectorAll('.versionText').forEach(el => el.textContent = APP_VERSION); renderChangelog();
     
-    const delayPrefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 3}');
+    const delayPrefs = JSON.parse(localStorage.getItem('confirmDelayPrefs_v2') || '{"danger": 3, "warning": 0}');
     document.getElementById('delayDangerInput').value = delayPrefs.danger; document.getElementById('delayWarningInput').value = delayPrefs.warning;
     const updateDelayPrefs = () => { localStorage.setItem('confirmDelayPrefs_v2', JSON.stringify({ danger: parseInt(document.getElementById('delayDangerInput').value) || 0, warning: parseInt(document.getElementById('delayWarningInput').value) || 0 })); saveSettingsToCloud(true); };
     document.getElementById('delayDangerInput').addEventListener('change', updateDelayPrefs); document.getElementById('delayWarningInput').addEventListener('change', updateDelayPrefs);
