@@ -307,22 +307,30 @@ input[type=range]#voteSlider.thumb-approve::-webkit-slider-thumb { background: v
 .toolbar-right { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; flex: 1; justify-content: flex-end; }
 .toolbar-group { display: flex; align-items: center; gap: 6px; }
 
-/* 🌟 关键魔法 2：搜索框的外壳容器吸纳所有可用空间，并靠右对齐 */
-.toolbar-right .toolbar-group:first-child { flex: 1; display: flex; justify-content: flex-end; transition: all 0.3s; }
+/* 🌟 修复：搜索框扩展改为“容器平滑扩宽”，避免输入框本体 width 动画导致布局抖动 */
+.toolbar-right .toolbar-group:first-child { 
+    display: flex;
+    justify-content: flex-end;
+    flex: 1 1 220px;
+    min-width: 180px;
+    max-width: 280px;
+    transition: max-width 0.35s cubic-bezier(0.1, 0.8, 0.3, 1);
+}
+.toolbar-right .toolbar-group:first-child:focus-within {
+    max-width: 520px;
+}
 
-/* 🌟 关键魔法 3：搜索框平时只占 180px，聚焦时瞬间撑满整个父容器 (width: 100%) */
 .search-input { 
     padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border-color); 
     font-size: 13px; background: var(--input-bg); color: var(--text-main); 
-    outline: none; 
-    width: 180px; /* 平时的斯文状态 */
+    outline: none;
+    width: 100%;
     max-width: 100%; 
-    transition: width 0.4s cubic-bezier(0.1, 0.8, 0.3, 1), box-shadow 0.3s, border-color 0.3s; 
+    transition: box-shadow 0.3s, border-color 0.3s; 
 }
 .search-input:focus { 
     border-color: var(--primary); 
     box-shadow: 0 0 0 3px rgba(240, 145, 153, 0.15); 
-    width: 100%; /* 霸气铺满的瞬间 */
 }
 
 /* ================= 原始分划线效果 ================= */
